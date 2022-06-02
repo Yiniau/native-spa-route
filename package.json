@@ -1,0 +1,39 @@
+{
+  "name": "native-spa-route",
+  "version": "0.0.8",
+  "files": [
+    "dist",
+    "es",
+    "src",
+    "index.html"
+  ],
+  "type": "module",
+  "module": "./dist/main.es.js",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./es/main.d.ts",
+        "default": "./dist/main.es.js"
+      },
+      "require": {
+        "types": "./es/main.d.ts",
+        "default": "./dist/main.umd.js"
+      }
+    }
+  },
+  "types": "./es/main.d.ts",
+  "main": "./dist/main.es.js",
+  "unpkg": "./dist/main.es.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build"
+  },
+  "dependencies": {
+    "lit": "^2.0.2"
+  },
+  "devDependencies": {
+    "@types/node": "^17.0.38",
+    "typescript": "^4.5.4",
+    "vite": "^2.9.9"
+  }
+}
