@@ -7,78 +7,62 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 	<title>APP 1</title>
 </head>
-<style>
-	:root {
-		--font-family-base: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
-		--font-family-mono: source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
-	}
-
-	* {
-		box-sizing: border-box;
-	}
-
-	body {
-		margin: 0;
-    padding: 0;
-		min-width: 100vw;
-		min-height: 100vh;
-		line-height: 1.4;
-		font-family: var(--font-family-base);
-		font-size: 16px;
-		font-weight: 400;
-		direction: ltr;
-		font-synthesis: none;
-		text-rendering: optimizeLegibility;
-		-webkit-font-smoothing: antialiased;
-		-moz-osx-font-smoothing: grayscale;
-	}
-</style>
 
 <body>
+	<style>
+		:root {
+			--font-family-base: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+			--font-family-mono: source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
+		}
+	
+		* {
+			box-sizing: border-box;
+		}
+	
+		body {
+			margin: 0;
+			padding: 0;
+			min-width: 100vw;
+			min-height: 100vh;
+			line-height: 1.4;
+			font-family: var(--font-family-base);
+			font-size: 16px;
+			font-weight: 400;
+			direction: ltr;
+			font-synthesis: none;
+			text-rendering: optimizeLegibility;
+			-webkit-font-smoothing: antialiased;
+			-moz-osx-font-smoothing: grayscale;
+		}
+	</style>
+
+	<main>
+		<ul>
+			<li><a href="/route1">route1</a></li>
+			<li><a href="/route2">route2</a></li>
+			<li><a href="/root">nest path: root</a></li>
+			<li><a href="/root/all">nest path: root => all</a></li>
+			<li><a href="/lazy">lazy component</a></li>
+		</ul>
+
+		<div style="border: 1px solid #d5d5d5; border-radius: 3px; box-shadow: 0 0 5px 0px #d5d5d5d9; margin: 15px; min-height: 100px;">
+			<native-route path="/">
+				<native-route path="route1" element="route1"></native-route>
+				<native-route path="route2" element="route2"></native-route>
+
+				<native-route path="root" element="<div>ROOT HERE</div>">
+					<native-route path="all" element="<div>ALL HERE</div>">
+					</native-route>
+				</native-route>
+			</native-route>
+		</div>
+		
+	</main>
+
 	<script type="module">
 		import { preload } from "/src/main.ts";
 		preload();
 	</script>
-
-	<ul>
-		<li><a href="/root1">root1</a></li>
-		<li><a href="/root2">root2</a></li>
-		<li><a href="/root">nest path: root</a></li>
-		<li><a href="/root/all">nest path: root => all</a></li>
-		<li><a href="/lazy">lazy component</a></li>
-	</ul>
-
-	<main>
-		<native-spa-route path="/">
-			<native-spa-route path="root" element="<div>ROOT HERE</div>">
-				<native-spa-route path="all" element="<div>ALL HERE</div>">
-				</native-spa-route>
-			</native-spa-route>
-		</native-spa-route>
-		
-		<native-spa-route path="/">
-			<native-spa-route path="root" exact element="<div>WILL NOT SHOW ON /root/all</div>">
-			</native-spa-route>
-			
-			<native-spa-route path="lazy" element="<div>WAIT TO IMPLEMENT</div>" url="" lazy>
-			</native-spa-route>
-		</native-spa-route>
-		
-	</main>
-
 </body>
 
-</html><!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite + Lit App</title>
-    <script type="module" src="/src/my-element.ts"></script>
-  </head>
-  <body>
-    <my-element>
-      <p>This is child content</p>
-    </my-element>
-  </body>
 </html>

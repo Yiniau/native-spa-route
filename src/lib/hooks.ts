@@ -7,9 +7,10 @@ export function hook_a_link() {
         e.preventDefault();
 
         history.pushState(
-          JSON.parse(
-            JSON.stringify(document.body.__frameless_context?.routeData ?? {})
-          ),
+          // JSON.parse(
+          //   JSON.stringify(document.body.__frameless_context?.routeData ?? {})
+          // ),
+          {},
           target.getAttribute('title') ?? '',
           href
         );

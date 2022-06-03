@@ -1,8 +1,8 @@
 import { html, LitElement, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
+import { unsafeHTML } from 'lit/directives/unsafe-html.js';
 
 import { hook_route_change, unhook_route_change } from '@/lib/hooks';
-const a = import('@/lib/hooks');
 
 export type RouteConfig = {
   path: string;
@@ -13,7 +13,7 @@ export type RouteConfig = {
 function getFullPath(url: string, node: HTMLElement): string {
   let isR = /^\//.test(url);
   if (node.parentElement && node.parentElement.tagName !== 'BODY') {
-    if (node.parentElement.tagName === 'NATIVE-SPA-ROUTE') {
+    if (node.parentElement.tagName === 'NATIVE-ROUTE') {
       const parentPath = node.parentElement.getAttribute('path') ?? '';
       const _url = `${isR ? '' : '/'}${url}`;
       if (parentPath === '' || parentPath === '/') {
@@ -31,79 +31,62 @@ function getFullPath(url: string, node: HTMLElement): string {
   return url;
 }
 
-function isEmpty(obj: any): boolean {
-  return [null, undefined].includes(obj);
-}
-
-/**
- * An example element.
- *
- * @slot - This element has a slot
- * @csspart button - The button
- */
 @customElement('native-route')
 export class MyElement extends LitElement {
-  @property({ type: String, reflect: true })
-  // path: string = this.getAttribute('path') ?? '';
+  @property({ type: String })
   path: string = '';
 
-  @property({ type: Boolean, reflect: true })
+  @property({ type: Boolean })
   exact: boolean = false;
 
-  @property({ type: String, reflect: true })
-  // element: string = this.getAttribute('element') ?? '';
+  @property({ type: String })
   element: string = '';
 
-  @property({ type: String, reflect: true })
+  @property({ type: String })
   url?: string;
 
-  @property({ type: Boolean, reflect: true })
-  // lazy: boolean = ['', 'true'].includes(this.getAttribute('lazy') ?? 'false');
+  @property({ type: Boolean })
   lazy: boolean = false;
 
-  @property({ type: String, reflect: true, attribute: 'append-direction' })
+  @property({ type: String, attribute: 'append-direction' })
   appendDirection: 'before' | 'after' = 'after';
 
-  @property({ reflect: true, attribute: 'custom-render' })
+  @property({ attribute: 'custom-render' })
   customRender: boolean | string = false;
 
   @state()
   private active: boolean = false;
 
   @state({ hasChanged: () => false })
-  private _url_module?: Promise<any>;
+  private fullpath: string = '';
 
-  constructor() {
-    super();
-  }
+  @state({ hasChanged: () => false })
+  protected _url_module?: Promise<any>;
 
   render() {
     const content = this.active
       ? this.customRender
         ? nothing
-        : this.element
+        : unsafeHTML(this.element)
       : nothing;
-    return html`
-      ${this.appendDirection === 'before'
-        ? html`${content}<slot></slot>`
-        : html`<slot></slot>${content}`}
-    `;
+    return this.appendDirection === 'before'
+      ? html`${content}<slot></slot>`
+      : html`<slot></slot>${content}`;
   }
 
-  loadAssets() {
-    const url = this.getAttribute('url');
+  private loadAssets() {
+    const url = this.url;
     if (typeof url === 'string') {
-      // Route.LOADED_URL[url] = 1;
-      this._url_module = import(url);
+      this._url_module = import(/* @vite-ignore */ url);
       return this._url_module;
     }
     return null;
   }
 
-  route_change_callback() {
-    let _path = this.path;
-    if (!/^\//.test(_path)) {
-      _path = getFullPath(_path, this);
+  private route_change_callback = () => {
+    let _path = this.fullpath;
+    if (!_path) {
+      debugger;
     }
 
     if (this.exact) {
@@ -111,7 +94,8 @@ export class MyElement extends LitElement {
       return;
     }
 
-    const local_pg = window.location.pathname.split('/').filter((t) => !!t);
+    const pathname = window.location.pathname ?? '';
+    const local_pg = pathname.split('/').filter((t) => !!t);
     const route_pg = _path.split('/').filter((t) => !!t);
     let isMatch = true;
     for (let i = 0; i < route_pg.length; i++) {
@@ -125,36 +109,63 @@ export class MyElement extends LitElement {
     }
 
     this.active = isMatch;
+    // this.requestUpdate();
+  };
+
+  async updated(changedProperties: Map<string | number | symbol, unknown>) {
+    if (changedProperties.has('active')) {
+      let module = this._url_module;
+      if (!this.active) {
+        return;
+      }
+      if (!this.customRender) {
+        return;
+      }
+
+      if (this.lazy && this.url && !module) {
+        module = this.loadAssets() ?? undefined;
+      }
+
+      if (!this.lazy) {
+        if (!module) {
+          throw new Error('No component module found');
+        }
+      }
+
+      const customRenderDom = document.createElement('div');
+
+      if (this.appendDirection === 'before') {
+        if (!(this.renderRoot.firstElementChild instanceof HTMLElement)) {
+          this.renderRoot.appendChild(customRenderDom);
+        } else {
+          this.renderRoot.insertBefore(
+            this.renderRoot.firstElementChild,
+            customRenderDom
+          );
+        }
+      } else {
+        this.renderRoot.appendChild(customRenderDom);
+      }
+
+      (await module)[
+        typeof this.customRender === 'string'
+          ? this.customRender === ''
+            ? 'render'
+            : this.customRender
+          : 'render'
+      ](customRenderDom);
+    }
+    if (changedProperties.has('path')) {
+      this.fullpath = getFullPath(this.path, this);
+    }
+    if (changedProperties.has('_path')) {
+      debugger;
+    }
   }
 
-	updated(changedProperties: Map<string | number | symbol, unknown>) {
-		let module;
-		if (changedProperties.has('active')) {
-			if (!this.active) {
-				return;
-			}
-
-			if (!this.lazy) {
-				if (!this._url_module) {
-					const module = await this.loadAssets();
-					if (module.render) {
-						
-					}
-				}
-			}
-
-			if (this.lazy && !this._url_module) {
-				this.loadAssets();
-			}
-			if (this.url && this.lazy) {
-				if (!this._url_module) {
-					module = this.loadAssets();
-				}
-			}
-		}
-	}
-
   connectedCallback() {
+    super.connectedCallback();
+    this.fullpath = getFullPath(this.path, this);
     if (!this.lazy && this.url) {
       this.loadAssets();
     }
@@ -163,6 +174,7 @@ export class MyElement extends LitElement {
   }
 
   disconnectedCallback() {
+    super.disconnectedCallback();
     unhook_route_change(this.route_change_callback);
   }
 }
