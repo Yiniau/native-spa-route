@@ -54,6 +54,9 @@ export class MyElement extends LitElement {
   @property({ attribute: 'custom-render' })
   customRender: boolean | string = false;
 
+  @property({ type: Boolean, attribute: 'render-after-ready' })
+  renderAfterReady: boolean = false;
+
   @state()
   private active: boolean = false;
 
@@ -63,12 +66,20 @@ export class MyElement extends LitElement {
   @state({ hasChanged: () => false })
   protected _url_module?: Promise<any>;
 
+  @state()
+  protected moduleReady: 'nothing' | 'pending' | 'fulfilled' | 'rejected' =
+    'nothing';
+
   render() {
-    const content = this.active
-      ? this.customRender
-        ? nothing
-        : unsafeHTML(this.element)
-      : nothing;
+    if (!this.active) {
+      return nothing;
+    }
+
+    if (this.renderAfterReady && this.moduleReady !== 'fulfilled') {
+      return nothing;
+    }
+
+    const content = this.customRender ? nothing : unsafeHTML(this.element);
     return this.appendDirection === 'before'
       ? html`${content}<slot></slot>`
       : html`<slot></slot>${content}`;
@@ -77,7 +88,16 @@ export class MyElement extends LitElement {
   private loadAssets() {
     const url = this.url;
     if (typeof url === 'string') {
-      this._url_module = import(/* @vite-ignore */ url);
+      this.moduleReady = 'pending';
+      this._url_module = import(/* @vite-ignore */ url)
+        .then((t) => {
+          this.moduleReady = 'fulfilled';
+          return t;
+        })
+        .catch((e) => {
+          this.moduleReady = 'rejected';
+          throw e;
+        });
       return this._url_module;
     }
     return null;
@@ -85,9 +105,6 @@ export class MyElement extends LitElement {
 
   private route_change_callback = () => {
     let _path = this.fullpath;
-    if (!_path) {
-      debugger;
-    }
 
     if (this.exact) {
       this.active = window.location.pathname === _path;
@@ -97,6 +114,12 @@ export class MyElement extends LitElement {
     const pathname = window.location.pathname ?? '';
     const local_pg = pathname.split('/').filter((t) => !!t);
     const route_pg = _path.split('/').filter((t) => !!t);
+
+    if (route_pg.length > local_pg.length) {
+      this.active = false;
+      return;
+    }
+
     let isMatch = true;
     for (let i = 0; i < route_pg.length; i++) {
       if (i >= local_pg.length) break;
@@ -109,7 +132,7 @@ export class MyElement extends LitElement {
     }
 
     this.active = isMatch;
-    // this.requestUpdate();
+    return;
   };
 
   async updated(changedProperties: Map<string | number | symbol, unknown>) {
@@ -118,21 +141,24 @@ export class MyElement extends LitElement {
       if (!this.active) {
         return;
       }
-      if (!this.customRender) {
-        return;
-      }
 
       if (this.lazy && this.url && !module) {
         module = this.loadAssets() ?? undefined;
       }
 
-      if (!this.lazy) {
-        if (!module) {
-          throw new Error('No component module found');
-        }
+      if (this.customRender === false) {
+        return;
+      }
+
+      if (!module) {
+        throw new Error('No component module found');
       }
 
       const customRenderDom = document.createElement('div');
+
+      if (this.renderAfterReady) {
+        await module;
+      }
 
       if (this.appendDirection === 'before') {
         if (!(this.renderRoot.firstElementChild instanceof HTMLElement)) {
@@ -158,9 +184,6 @@ export class MyElement extends LitElement {
     if (changedProperties.has('path')) {
       this.fullpath = getFullPath(this.path, this);
     }
-    if (changedProperties.has('_path')) {
-      debugger;
-    }
   }
 
   connectedCallback() {
@@ -176,6 +199,10 @@ export class MyElement extends LitElement {
   disconnectedCallback() {
     super.disconnectedCallback();
     unhook_route_change(this.route_change_callback);
+  }
+
+  protected createRenderRoot() {
+    return this;
   }
 }
 
