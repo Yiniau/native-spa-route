@@ -2,6 +2,7 @@ lockfileVersion: 5.3
 
 specifiers:
   '@types/node': ^17.0.38
+  esbuild: ^0.14.42
   fs-extra: ^10.1.0
   lit: ^2.0.2
   typescript: ^4.5.4
@@ -13,6 +14,7 @@ dependencies:
 
 devDependencies:
   '@types/node': 17.0.38
+  esbuild: registry.npmmirror.com/esbuild/0.14.42
   fs-extra: registry.npmmirror.com/fs-extra/10.1.0
   typescript: 4.7.2
   vite: 2.9.9
@@ -31,34 +33,6 @@ packages:
   /@types/trusted-types/2.0.2:
     resolution: {integrity: sha512-F5DIZ36YVLE+PN+Zwws4kJogq47hNgX3Nx6WyDJ3kcplxyke3XIzB8uK5n/Lpm1HBsbGzd6nmGehL8cPekP+Tg==}
     dev: false
-
-  /esbuild/0.14.42:
-    resolution: {integrity: sha512-V0uPZotCEHokJdNqyozH6qsaQXqmZEOiZWrXnds/zaH/0SyrIayRXWRB98CENO73MIZ9T3HBIOsmds5twWtmgw==}
-    engines: {node: '>=12'}
-    hasBin: true
-    requiresBuild: true
-    optionalDependencies:
-      esbuild-android-64: registry.npmmirror.com/esbuild-android-64/0.14.42
-      esbuild-android-arm64: registry.npmmirror.com/esbuild-android-arm64/0.14.42
-      esbuild-darwin-64: registry.npmmirror.com/esbuild-darwin-64/0.14.42
-      esbuild-darwin-arm64: registry.npmmirror.com/esbuild-darwin-arm64/0.14.42
-      esbuild-freebsd-64: registry.npmmirror.com/esbuild-freebsd-64/0.14.42
-      esbuild-freebsd-arm64: registry.npmmirror.com/esbuild-freebsd-arm64/0.14.42
-      esbuild-linux-32: registry.npmmirror.com/esbuild-linux-32/0.14.42
-      esbuild-linux-64: registry.npmmirror.com/esbuild-linux-64/0.14.42
-      esbuild-linux-arm: registry.npmmirror.com/esbuild-linux-arm/0.14.42
-      esbuild-linux-arm64: registry.npmmirror.com/esbuild-linux-arm64/0.14.42
-      esbuild-linux-mips64le: registry.npmmirror.com/esbuild-linux-mips64le/0.14.42
-      esbuild-linux-ppc64le: registry.npmmirror.com/esbuild-linux-ppc64le/0.14.42
-      esbuild-linux-riscv64: registry.npmmirror.com/esbuild-linux-riscv64/0.14.42
-      esbuild-linux-s390x: registry.npmmirror.com/esbuild-linux-s390x/0.14.42
-      esbuild-netbsd-64: registry.npmmirror.com/esbuild-netbsd-64/0.14.42
-      esbuild-openbsd-64: registry.npmmirror.com/esbuild-openbsd-64/0.14.42
-      esbuild-sunos-64: registry.npmmirror.com/esbuild-sunos-64/0.14.42
-      esbuild-windows-32: registry.npmmirror.com/esbuild-windows-32/0.14.42
-      esbuild-windows-64: registry.npmmirror.com/esbuild-windows-64/0.14.42
-      esbuild-windows-arm64: registry.npmmirror.com/esbuild-windows-arm64/0.14.42
-    dev: true
 
   /function-bind/1.1.1:
     resolution: {integrity: sha512-yIovAzMX49sF8Yl58fSCWJ5svSLuaibPxXQJFLmBObTuCr0Mf1KiPopGM9NiFjiYBCbfaa2Fh6breQ6ANVTI0A==}
@@ -170,7 +144,7 @@ packages:
       stylus:
         optional: true
     dependencies:
-      esbuild: 0.14.42
+      esbuild: registry.npmmirror.com/esbuild/0.14.42
       postcss: 8.4.14
       resolve: 1.22.0
       rollup: 2.75.5
@@ -494,6 +468,36 @@ packages:
     requiresBuild: true
     dev: true
     optional: true
+
+  registry.npmmirror.com/esbuild/0.14.42:
+    resolution: {integrity: sha512-V0uPZotCEHokJdNqyozH6qsaQXqmZEOiZWrXnds/zaH/0SyrIayRXWRB98CENO73MIZ9T3HBIOsmds5twWtmgw==, registry: http://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/esbuild/-/esbuild-0.14.42.tgz}
+    name: esbuild
+    version: 0.14.42
+    engines: {node: '>=12'}
+    hasBin: true
+    requiresBuild: true
+    optionalDependencies:
+      esbuild-android-64: registry.npmmirror.com/esbuild-android-64/0.14.42
+      esbuild-android-arm64: registry.npmmirror.com/esbuild-android-arm64/0.14.42
+      esbuild-darwin-64: registry.npmmirror.com/esbuild-darwin-64/0.14.42
+      esbuild-darwin-arm64: registry.npmmirror.com/esbuild-darwin-arm64/0.14.42
+      esbuild-freebsd-64: registry.npmmirror.com/esbuild-freebsd-64/0.14.42
+      esbuild-freebsd-arm64: registry.npmmirror.com/esbuild-freebsd-arm64/0.14.42
+      esbuild-linux-32: registry.npmmirror.com/esbuild-linux-32/0.14.42
+      esbuild-linux-64: registry.npmmirror.com/esbuild-linux-64/0.14.42
+      esbuild-linux-arm: registry.npmmirror.com/esbuild-linux-arm/0.14.42
+      esbuild-linux-arm64: registry.npmmirror.com/esbuild-linux-arm64/0.14.42
+      esbuild-linux-mips64le: registry.npmmirror.com/esbuild-linux-mips64le/0.14.42
+      esbuild-linux-ppc64le: registry.npmmirror.com/esbuild-linux-ppc64le/0.14.42
+      esbuild-linux-riscv64: registry.npmmirror.com/esbuild-linux-riscv64/0.14.42
+      esbuild-linux-s390x: registry.npmmirror.com/esbuild-linux-s390x/0.14.42
+      esbuild-netbsd-64: registry.npmmirror.com/esbuild-netbsd-64/0.14.42
+      esbuild-openbsd-64: registry.npmmirror.com/esbuild-openbsd-64/0.14.42
+      esbuild-sunos-64: registry.npmmirror.com/esbuild-sunos-64/0.14.42
+      esbuild-windows-32: registry.npmmirror.com/esbuild-windows-32/0.14.42
+      esbuild-windows-64: registry.npmmirror.com/esbuild-windows-64/0.14.42
+      esbuild-windows-arm64: registry.npmmirror.com/esbuild-windows-arm64/0.14.42
+    dev: true
 
   registry.npmmirror.com/event-stream/3.3.4:
     resolution: {integrity: sha512-QHpkERcGsR0T7Qm3HNJSyXKEEj8AHNxkY3PK8TS2KJvQ7NiSHe3DDpwVKKtoYprL/AreyzFBeIkBIWChAqn60g==, registry: http://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/event-stream/-/event-stream-3.3.4.tgz}
