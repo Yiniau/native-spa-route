@@ -32,7 +32,7 @@ function getFullPath(url: string, node: HTMLElement): string {
 }
 
 @customElement('native-route')
-export class MyElement extends LitElement {
+export class Route extends LitElement {
   @property({ type: String })
   path: string = '';
 
@@ -214,6 +214,6 @@ export class MyElement extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'native-route': MyElement;
+    'native-route': Route;
   }
 }
