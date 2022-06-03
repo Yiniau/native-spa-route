@@ -56,6 +56,9 @@ export class MyElement extends LitElement {
 
   @property({ type: Boolean, attribute: 'render-after-ready' })
   renderAfterReady: boolean = false;
+  
+  @property({ type: Boolean, })
+  shadow: boolean = true;
 
   @state()
   private active: boolean = false;
@@ -202,6 +205,9 @@ export class MyElement extends LitElement {
   }
 
   protected createRenderRoot() {
+    if (this.shadow) {
+      return super.createRenderRoot();
+    }
     return this;
   }
 }

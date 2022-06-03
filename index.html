@@ -15,6 +15,11 @@
   </head>
 
   <body class="sl-theme-light">
+		<script type="module" async>
+      import { preload } from '/src/main.ts';
+      preload();
+    </script>
+
     <style>
       :root {
         --font-family-base: -apple-system, BlinkMacSystemFont, 'Segoe UI',
@@ -43,14 +48,22 @@
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
       }
+
+			native-route {
+				display: none;
+			}
+			native-route:defined {
+				display: block;
+			}
     </style>
 
     <main>
+			<p>NOTICE!, this demo use `:defined` pseudo-class to avoid undefined element's inner content leak</p>
       <ul>
         <li><a href="/common">common</a></li>
         <li><a href="/root">nest path: root</a></li>
         <li><a href="/root/all">nest path: root/all</a></li>
-				<div style="height: 16px"></div>
+        <div style="height: 16px"></div>
         <li>
           <a href="/lazy">lazy demo</a>
           <native-route path="/lazy">
@@ -59,15 +72,21 @@
                 <a href="/lazy/sl/button">@shoelace-style/shoelace Button</a>
               </li>
               <li>
-                <a href="/lazy/sl/ready_button">render shoelace Button after module ready, disable cache to get clear effect</a>
+                <a href="/lazy/sl/ready_button"
+                  >render shoelace Button after module ready, disable cache to
+                  get clear effect</a
+                >
               </li>
             </ul>
           </native-route>
         </li>
         <div style="height: 16px"></div>
-				<li>
-          <a href="/custom-render">custom render demo, this could be use to render react/vue/other render lib content</a>
-          <native-route path="/lazy">
+        <li>
+          <a href="/custom-render"
+            >custom render demo, this could be use to render react/vue/other
+            render lib content</a
+          >
+          <native-route path="/custom-render">
             <ul>
               <li>
                 <a href="/custom-render/react/17">react 17 demo</a>
@@ -110,31 +129,26 @@
             element="<sl-button>Button</sl-button>"
             lazy
           >
-					</native-route>
+          </native-route>
           <native-route
             path="ready_button"
             url="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.0.0-beta.74/dist/components/button/button.js"
-            element="<sl-button>Button</sl-button>"
-						render-after-ready
+            element="<sl-button>Render After Ready Button</sl-button>"
+            render-after-ready
             lazy
           >
-					</native-route>
+          </native-route>
         </native-route>
-        
-				<native-route path="/custom-render">
+
+        <native-route path="/custom-render">
           <native-route path="react">
-						<native-route path="17">TODO</native-route>
-					</native-route>
+            <native-route path="17">TODO</native-route>
+          </native-route>
           <native-route path="vue">
-						<native-route path="3">TODO</native-route>
-					</native-route>
+            <native-route path="3">TODO</native-route>
+          </native-route>
         </native-route>
       </div>
     </main>
-
-    <script type="module">
-      import { preload } from '/src/main.ts';
-      preload();
-    </script>
   </body>
 </html>
