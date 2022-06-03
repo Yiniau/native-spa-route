@@ -26,14 +26,17 @@
   "unpkg": "./dist/main.es.js",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build"
+    "build": "tsc && vite build",
+    "make:demo": "zx ./scripts/make-demo.mjs"
   },
   "dependencies": {
     "lit": "^2.0.2"
   },
   "devDependencies": {
     "@types/node": "^17.0.38",
+    "fs-extra": "^10.1.0",
     "typescript": "^4.5.4",
-    "vite": "^2.9.9"
+    "vite": "^2.9.9",
+    "zx": "^6.2.0"
   }
 }

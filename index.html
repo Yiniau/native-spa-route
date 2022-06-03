@@ -16,7 +16,7 @@
 
   <body class="sl-theme-light">
 		<script type="module" async>
-      import { preload } from '/src/main.ts';
+      import { preload } from /*IMPORTSOURCESTART*/'/src/main.ts'/*IMPORTSOURCEEND*/;
       preload();
     </script>
 
@@ -58,12 +58,16 @@
     </style>
 
     <main>
-			<p>NOTICE!, this demo use `:defined` pseudo-class to avoid undefined element's inner content leak</p>
+			<p>NOTICE! this demo use `:defined` pseudo-class to avoid undefined element's inner content leak</p>
+			<p>BTW. you could use `shadow="false"` to disable shadowDOM</p>
+
       <ul>
         <li><a href="/common">common</a></li>
         <li><a href="/root">nest path: root</a></li>
         <li><a href="/root/all">nest path: root/all</a></li>
+
         <div style="height: 16px"></div>
+
         <li>
           <a href="/lazy">lazy demo</a>
           <native-route path="/lazy">
@@ -80,7 +84,9 @@
             </ul>
           </native-route>
         </li>
+
         <div style="height: 16px"></div>
+
         <li>
           <a href="/custom-render"
             >custom render demo, this could be use to render react/vue/other
@@ -109,6 +115,8 @@
         "
       >
         <native-route path="/common" element="common"></native-route>
+
+				<!-- basic useage -->
         <native-route path="/">
           <!-- exact case, only active while pathname full match /root -->
           <native-route
@@ -122,24 +130,26 @@
           </native-route>
         </native-route>
 
+				<!-- lazy useage -->
         <native-route path="/lazy/sl">
           <native-route
             path="button"
             url="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.0.0-beta.74/dist/components/button/button.js"
-            element="<sl-button>Button</sl-button>"
+            element='<sl-button>Button</sl-button><sl-button variant="primary">Primary</sl-button><sl-button variant="neutral" loading>Neutral</sl-button>'
             lazy
           >
           </native-route>
           <native-route
             path="ready_button"
             url="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.0.0-beta.74/dist/components/button/button.js"
-            element="<sl-button>Render After Ready Button</sl-button>"
+            element='<sl-button>Render After Ready Button</sl-button><sl-button variant="primary">Primary</sl-button><sl-button variant="neutral" loading>Neutral</sl-button>'
             render-after-ready
             lazy
           >
           </native-route>
         </native-route>
 
+				<!-- custom render useage -->
         <native-route path="/custom-render">
           <native-route path="react">
             <native-route path="17">TODO</native-route>
