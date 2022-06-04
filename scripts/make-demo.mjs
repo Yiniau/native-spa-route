@@ -24,5 +24,5 @@ await esbuild.build({
 });
 
 let indexHtml = await fs.readFile(indexHtmlPath, { encoding: 'utf8' });
-indexHtml = indexHtml.replace(/\/\*IMPORTSOURCESTART\*\/.*\/\*IMPORTSOURCEEND\*\//, '"./dist/main.js"');
+indexHtml = indexHtml.replace(/\/\*IMPORTSOURCESTART\*\/.*\/\*IMPORTSOURCEEND\*\//, '"/dist/main.js"');
 await fs.writeFile(path.resolve(demoPath, 'index.html'), indexHtml);
