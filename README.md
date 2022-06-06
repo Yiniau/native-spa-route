@@ -108,8 +108,10 @@ Those `a` tags only show while `/^\/lazy/.test(location.pathname) === true`.
 
 ## disable Shadow DOM wrapper
 
-the Shadow DOM wrapper is default provide by `lit`, in some situations it mayte cause problem,
-use `shadow="false"` could disable it. But! it mayte cause more content leak.
+the Shadow DOM wrapper is default provide by `lit`.
+
+In some cases, it may cause strange problems, such as Antd's pop-up window mounting problem.
+use `shadow="false"` could disable it. But! it may cause more content leak.
 
 example:
 
