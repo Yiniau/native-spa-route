@@ -164,10 +164,9 @@ use by `shadowCSSUrl="<css url here>"`
 ```html
 <native-route path="17/with-css" lazy url="@PUBLICK_PATH/react17.js" custom-render="withCss" shadowCSSUrl="@PUBLICK_PATH/react17.css"></native-route>
 <native-route path="3/basic" lazy url="@PUBLICK_PATH/vue3.js" shadowCSSUrl="@PUBLICK_PATH/vue3.css" custom-render></native-route>
-</native-route>
 ```
 
-## disable Shadow DOM wrapper
+## Disable Shadow DOM wrapper
 
 the Shadow DOM wrapper is default provide by `lit`.
 

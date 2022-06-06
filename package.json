@@ -1,7 +1,8 @@
 {
   "name": "native-spa-route",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "author": "Yiniau",
+  "license": "MIT",
   "email": "yiranzhouyida@gmail.com",
   "homepage": "https://native-spa-route.vercel.app",
   "description": "provide SPA route's experience with native web component",
