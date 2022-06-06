@@ -109,6 +109,63 @@ example code:
 
 Those `a` tags only show while `/^\/lazy/.test(location.pathname) === true`.
 
+## Lazy support
+
+> see the demo to get detail
+
+```html
+<!-- lazy useage -->
+<native-route path="/lazy/sl">
+	<native-route
+		path="button"
+		url="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.0.0-beta.74/dist/components/button/button.js"
+		element='<sl-button>Button</sl-button><sl-button variant="primary">Primary</sl-button><sl-button variant="neutral" loading>Neutral</sl-button>'
+		lazy
+	>
+	</native-route>
+	<native-route
+		path="ready_button"
+		url="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.0.0-beta.74/dist/components/button/button.js"
+		element='<sl-button>Render After Ready Button</sl-button><sl-button variant="primary">Primary</sl-button><sl-button variant="neutral" loading>Neutral</sl-button>'
+		render-after-ready
+		lazy
+	>
+	</native-route>
+</native-route>
+```
+
+## Custom Render
+
+> see the demo to get detail
+
+this could be use to render react/vue/other render lib content.
+
+```html
+<native-route path="/custom-render">
+	<native-route path="react">
+		<native-route path="17/basic" lazy url="@PUBLICK_PATH/react17.js" custom-render></native-route>
+		<native-route path="17/custom-render-name" lazy url="@PUBLICK_PATH/react17.js" custom-render="customRenderFunction"></native-route>
+		<native-route path="17/with-css" lazy url="@PUBLICK_PATH/react17.js" custom-render="withCss" shadowCSSUrl="@PUBLICK_PATH/react17.css"></native-route>
+	</native-route>
+	<native-route path="vue">
+		<native-route path="3/basic" lazy url="@PUBLICK_PATH/vue3.js" shadowCSSUrl="@PUBLICK_PATH/vue3.css" custom-render></native-route>
+	</native-route>
+</native-route>
+```
+
+**this function require the JS source export an render function, the name can custom by `custom-render="<render function name>"`**
+
+## Content Style CSS
+
+this function use `<style>@import url(xxx)</style>` to inject css into Shadow DOM content.
+
+use by `shadowCSSUrl="<css url here>"`
+
+```html
+<native-route path="17/with-css" lazy url="@PUBLICK_PATH/react17.js" custom-render="withCss" shadowCSSUrl="@PUBLICK_PATH/react17.css"></native-route>
+<native-route path="3/basic" lazy url="@PUBLICK_PATH/vue3.js" shadowCSSUrl="@PUBLICK_PATH/vue3.css" custom-render></native-route>
+</native-route>
+```
 
 ## disable Shadow DOM wrapper
 
