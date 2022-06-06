@@ -1,6 +1,6 @@
 {
   "name": "native-spa-route",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "author": "Yiniau",
   "email": "yiranzhouyida@gmail.com",
   "description": "provide SPA route's experience with native web component",
@@ -9,7 +9,9 @@
     "dist",
     "es",
     "src",
-    "index.html"
+    "index.html",
+    "LICENSE",
+    "README.md"
   ],
   "type": "module",
   "module": "./es/main.js",
