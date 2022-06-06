@@ -31,6 +31,7 @@ if (process.env.IN_LOCAL) {
 }
 
 // react 17 build
+await $`cd ${path.resolve(demoPath, 'react17')} && pnpm i`;
 await esbuild.build({
 	bundle: true,
 	entryPoints: [path.resolve(testPath, 'react17', 'main.jsx')],
@@ -46,6 +47,7 @@ await esbuild.build({
 });
 
 // vue 3 build
+await $`cd ${path.resolve(demoPath, 'vue')} && pnpm i`;
 await esbuild.build({
 	bundle: true,
 	entryPoints: [path.resolve(testPath, 'vue', 'main.js')],
