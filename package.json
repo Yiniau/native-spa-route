@@ -1,7 +1,9 @@
 {
   "name": "native-spa-route",
   "version": "0.0.1",
-  "author": "",
+  "author": "Yiniau",
+  "email": "yiranzhouyida@gmail.com",
+  "description": "provide SPA route's experience with native web component",
   "files": [
     "demo",
     "dist",
@@ -28,6 +30,7 @@
     "dev:demo": "zx ./scripts/serve-demo.mjs",
     "make:demo": "zx ./scripts/make-demo.mjs"
   },
+  
   "dependencies": {
     "lit": "^2.0.2"
   },
