@@ -4,6 +4,9 @@ export function hook_a_link() {
     if (target.tagName === 'A') {
       const href = target.getAttribute('href');
       if (typeof href === 'string') {
+        if (href.startsWith('http')) {
+          return;
+        }
         e.preventDefault();
 
         history.pushState(

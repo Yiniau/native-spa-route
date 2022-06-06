@@ -1,9 +1,14 @@
 {
   "name": "native-spa-route",
-  "version": "0.0.4",
+  "version": "0.0.6",
   "author": "Yiniau",
   "email": "yiranzhouyida@gmail.com",
+  "homepage": "https://native-spa-route.vercel.app",
   "description": "provide SPA route's experience with native web component",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Yiniau/native-spa-route.git"
+  },
   "keywords": [
     "spa",
     "route",
@@ -32,6 +37,11 @@
   "types": "./es/main.d.ts",
   "main": "./es/main.js",
   "unpkg": "./es/main.js",
+  "jspm": {
+    "main": "./es/main.js",
+    "browser": "./es/main.js",
+    "es": "./es/main.js"
+  },
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
