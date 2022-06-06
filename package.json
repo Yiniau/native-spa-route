@@ -1,9 +1,15 @@
 {
   "name": "native-spa-route",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "author": "Yiniau",
   "email": "yiranzhouyida@gmail.com",
   "description": "provide SPA route's experience with native web component",
+  "keywords": [
+    "spa",
+    "route",
+    "native",
+    "webcomponent"
+  ],
   "files": [
     "demo",
     "dist",
