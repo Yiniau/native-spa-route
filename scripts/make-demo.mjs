@@ -25,6 +25,11 @@ await esbuild.build({
 	outfile: path.resolve(demoPath, 'dist', 'main.js'),
 });
 
+let publicPath = '/dist'
+if (process.env.IN_LOCAL) {
+	publicPath = 'http://localhost:3001/dist';
+}
+
 // react 17 build
 await esbuild.build({
 	bundle: true,
@@ -37,7 +42,7 @@ await esbuild.build({
 	},
 	outfile: path.resolve(demoPath, 'dist', 'react17.js'),
 	// plugins: [esbuildSvg()],
-	publicPath: 'http://localhost:3001/dist'
+	publicPath,
 });
 
 // vue 3 build
@@ -53,9 +58,10 @@ await esbuild.build({
 	},
 	outfile: path.resolve(demoPath, 'dist', 'vue3.js'),
 	plugins: [esbuildPluginVue()],
-	publicPath: 'http://localhost:3001/dist'
+	publicPath,
 });
 
 let indexHtml = await fs.readFile(indexHtmlPath, { encoding: 'utf8' });
-indexHtml = indexHtml.replace(/\/\*IMPORTSOURCESTART\*\/.*\/\*IMPORTSOURCEEND\*\//, '"/dist/main.js"');
+indexHtml = indexHtml.replace(/\/\*IMPORTSOURCESTART\*\/.*\/\*IMPORTSOURCEEND\*\//g, '"/dist/main.js"');
+indexHtml = indexHtml.replaceAll('@PUBLICK_PATH', '/dist');
 await fs.writeFile(path.resolve(demoPath, 'index.html'), indexHtml);

@@ -24,7 +24,12 @@ export default defineConfig({
       }
     }
   },
-  plugins: [],
+  plugins: [{
+    name: 'html-transform',
+    transformIndexHtml(html: string) {
+      return html.replace(/\@PUBLICK_PATH/g, 'http://localhost:3001/dist')
+    }
+  }],
   resolve: {
     alias: {
       '~': path.resolve(__dirname, './'),

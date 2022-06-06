@@ -49,6 +49,10 @@
         -moz-osx-font-smoothing: grayscale;
       }
 
+			code {
+				background-color: #61dafb;
+			}
+
 			native-route {
 				display: none;
 			}
@@ -58,8 +62,8 @@
     </style>
 
     <main>
-			<p>NOTICE! this demo use `:defined` pseudo-class to avoid undefined element's inner content leak</p>
-			<p>BTW. you could use `shadow="false"` to disable shadowDOM</p>
+			<p>NOTICE! this demo use `<code>:defined</code>` pseudo-class to avoid undefined element's inner content leak</p>
+			<p>BTW. you can use `<code>shadow="false"</code>` to disable shadowDOM</p>
 
       <ul>
         <li><a href="/common">common</a></li>
@@ -91,7 +95,7 @@
           <a href="/custom-render"
             >custom render demo, this could be use to render react/vue/other
             render lib content<br/>
-						if you run this under local dev environment, should extram run `dev:demo` command
+						<strong>If you are in a local environment, you need to additionally run the <code>pnpm run dev:demo</code> command</strong>
 					</a>
           <native-route path="/custom-render">
             <ul>
@@ -159,12 +163,12 @@
 				<!-- custom render useage -->
         <native-route path="/custom-render">
           <native-route path="react">
-            <native-route path="17/basic" lazy url="http://localhost:3001/dist/react17.js" custom-render></native-route>
-            <native-route path="17/custom-render-name" lazy url="http://localhost:3001/dist/react17.js" custom-render="customRenderFunction"></native-route>
-            <native-route path="17/with-css" lazy url="http://localhost:3001/dist/react17.js" custom-render="withCss" shadowCSSUrl="http://localhost:3001/dist/react17.css"></native-route>
+            <native-route path="17/basic" lazy url="@PUBLICK_PATH/react17.js" custom-render></native-route>
+            <native-route path="17/custom-render-name" lazy url="@PUBLICK_PATH/react17.js" custom-render="customRenderFunction"></native-route>
+            <native-route path="17/with-css" lazy url="@PUBLICK_PATH/react17.js" custom-render="withCss" shadowCSSUrl="@PUBLICK_PATH/react17.css"></native-route>
           </native-route>
           <native-route path="vue">
-            <native-route path="3/basic" lazy url="http://localhost:3001/dist/vue3.js" shadowCSSUrl="http://localhost:3001/dist/vue3.css" custom-render></native-route>
+            <native-route path="3/basic" lazy url="@PUBLICK_PATH/vue3.js" shadowCSSUrl="@PUBLICK_PATH/vue3.css" custom-render></native-route>
           </native-route>
         </native-route>
       </div>
