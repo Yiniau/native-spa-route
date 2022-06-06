@@ -3,10 +3,12 @@ import 'zx/globals';
 import fs from 'fs-extra';
 import path from 'path';
 import esbuild from 'esbuild';
+import esbuildPluginVue from 'esbuild-plugin-vue';
 
 const cwd = process.cwd();
 const srcPath = path.resolve(cwd, 'src');
-const distPath = path.resolve(cwd, 'dist');
+const testPath = path.resolve(cwd, 'test');
+// const distPath = path.resolve(cwd, 'dist');
 const demoPath = path.resolve(cwd, 'demo');
 const indexHtmlPath = path.resolve(cwd, 'index.html');
 
@@ -21,6 +23,37 @@ await esbuild.build({
 	target: 'es2017',
 	format: 'esm',
 	outfile: path.resolve(demoPath, 'dist', 'main.js'),
+});
+
+// react 17 build
+await esbuild.build({
+	bundle: true,
+	entryPoints: [path.resolve(testPath, 'react17', 'main.jsx')],
+	target: 'es2020',
+	format: 'esm',
+	loader: {
+	// 	'.tsx': 'ts'
+		'.svg': 'file'
+	},
+	outfile: path.resolve(demoPath, 'dist', 'react17.js'),
+	// plugins: [esbuildSvg()],
+	publicPath: 'http://localhost:3001/dist'
+});
+
+// vue 3 build
+await esbuild.build({
+	bundle: true,
+	entryPoints: [path.resolve(testPath, 'vue', 'main.js')],
+	target: 'es2020',
+	format: 'esm',
+	loader: {
+	// 	'.tsx': 'ts'
+		'.svg': 'file',
+		'.png': 'file'
+	},
+	outfile: path.resolve(demoPath, 'dist', 'vue3.js'),
+	plugins: [esbuildPluginVue()],
+	publicPath: 'http://localhost:3001/dist'
 });
 
 let indexHtml = await fs.readFile(indexHtmlPath, { encoding: 'utf8' });
