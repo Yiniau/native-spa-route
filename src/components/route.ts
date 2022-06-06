@@ -60,6 +60,9 @@ export class Route extends LitElement {
   @property({ type: Boolean, })
   shadow: boolean = true;
 
+  @property({ type: String, })
+  shadowCSSUrl: string = '';
+
   @state()
   private active: boolean = false;
 
@@ -83,9 +86,15 @@ export class Route extends LitElement {
     }
 
     const content = this.customRender ? nothing : unsafeHTML(this.element);
-    return this.appendDirection === 'before'
+    let ret = this.appendDirection === 'before'
       ? html`${content}<slot></slot>`
       : html`<slot></slot>${content}`;
+    
+    if (this.shadowCSSUrl) {
+      ret = html`<style>@import url(${this.shadowCSSUrl});</style>${ret}`;
+    }
+
+    return ret;
   }
 
   private loadAssets() {
@@ -146,7 +155,7 @@ export class Route extends LitElement {
       }
 
       if (this.lazy && this.url && !module) {
-        module = this.loadAssets() ?? undefined;
+        module = await this.loadAssets() ?? undefined;
       }
 
       if (this.customRender === false) {
@@ -158,10 +167,6 @@ export class Route extends LitElement {
       }
 
       const customRenderDom = document.createElement('div');
-
-      if (this.renderAfterReady) {
-        await module;
-      }
 
       if (this.appendDirection === 'before') {
         if (!(this.renderRoot.firstElementChild instanceof HTMLElement)) {
@@ -184,6 +189,7 @@ export class Route extends LitElement {
           : 'render'
       ](customRenderDom);
     }
+
     if (changedProperties.has('path')) {
       this.fullpath = getFullPath(this.path, this);
     }
