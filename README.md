@@ -171,12 +171,12 @@ use by `shadowCSSUrl="<css url here>"`
 the Shadow DOM wrapper is default provide by `lit`.
 
 In some cases, it may cause strange problems, such as Antd's pop-up window mounting problem.
-use `shadow="false"` could disable it. But! it may cause more content leak.
+use `disable-shadow` could disable it. But! it may cause more content leak.
 
 example:
 
 ```html
-<native-route xxxx shadow="false"></native-route>
+<native-route disable-shadow></native-route>
 ```
 
 ## Online Demo

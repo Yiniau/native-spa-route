@@ -57,8 +57,8 @@ export class Route extends LitElement {
   @property({ type: Boolean, attribute: 'render-after-ready' })
   renderAfterReady: boolean = false;
   
-  @property({ type: Boolean, })
-  shadow: boolean = true;
+  @property({ type: Boolean, attribute: 'disable-shadow' })
+  disableShadow: boolean = false;
 
   @property({ type: String, })
   shadowCSSUrl: string = '';
@@ -211,7 +211,7 @@ export class Route extends LitElement {
   }
 
   protected createRenderRoot() {
-    if (this.shadow) {
+    if (!this.disableShadow) {
       return super.createRenderRoot();
     }
     return this;
