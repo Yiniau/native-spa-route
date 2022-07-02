@@ -91,3 +91,16 @@ export function unhook_route_change(callback: (e: HistoryChangeEvent) => void) {
   window.removeEventListener('popstate', callback as EventListener, false);
 }
 
+export function redirect(
+  from: string | URL | null | undefined,
+  to: string | URL | null | undefined
+) {
+  if (location.pathname === from) {
+    history.pushState(null, '', to);
+  }
+  hook_route_change(() => {
+    if (location.pathname === from) {
+      history.pushState(null, '', to);
+    }
+  });
+}
