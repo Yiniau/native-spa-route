@@ -51,18 +51,18 @@ export function hook_history_change(
     let _url = url;
     _url = lifecycle?.url_adapter?.(_url) ?? url;
     // console.log('pushState', data, unused, url);
-    lifecycle?.before?.('push', data, unused, url);
-    originPushState.apply(this, [data, unused, url]);
+    lifecycle?.before?.('push', data, unused, _url);
+    originPushState.apply(this, [data, unused, _url]);
     window.dispatchEvent(
       new CustomEvent('history:pushState', {
         detail: {
           data,
           unused,
-          url,
+          _url,
         },
       })
     );
-    lifecycle?.after?.('push', data, unused, url);
+    lifecycle?.after?.('push', data, unused, _url);
   };
 
   History.prototype.replaceState = function replaceState(
@@ -73,18 +73,18 @@ export function hook_history_change(
     // console.log('replaceState', data, unused, url);
     let _url = url;
     _url = lifecycle?.url_adapter?.(_url) ?? url;
-    lifecycle?.before?.('replace', data, unused, url);
-    originReplaceState.apply(this, [data, unused, url]);
+    lifecycle?.before?.('replace', data, unused, _url);
+    originReplaceState.apply(this, [data, unused, _url]);
     window.dispatchEvent(
       new CustomEvent('history:replaceState', {
         detail: {
           data,
           unused,
-          url,
+          _url,
         },
       })
     );
-    lifecycle?.after?.('replace', data, unused, url);
+    lifecycle?.after?.('replace', data, unused, _url);
   };
 }
 

@@ -223,7 +223,7 @@ export class Route extends LitElement {
     return;
   };
 
-  private async _render_lazy_url_module() {
+  private async _render_url_module() {
     if (this.cssReady !== 'fulfilled' && this.cssReady !== 'rejected') return;
     if (this.moduleReady !== 'fulfilled' && this.moduleReady !== 'rejected')
       return;
@@ -283,19 +283,19 @@ export class Route extends LitElement {
           this.log('in lazy mode, some source not loaded, call loadAssets');
           this.loadAssets();
         } else {
-          this._render_lazy_url_module();
+          this._render_url_module();
         }
       }
     }
 
     if (changedProperties.has('moduleReady')) {
       if (changedProperties.get('moduleReady') === 'pending') {
-        this._render_lazy_url_module();
+        this._render_url_module();
       }
     }
     if (changedProperties.has('cssReady')) {
       if (changedProperties.get('cssReady') === 'pending') {
-        this._render_lazy_url_module();
+        this._render_url_module();
       }
     }
 
