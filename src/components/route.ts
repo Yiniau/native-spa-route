@@ -100,7 +100,7 @@ export class Route extends LitElement {
 
   protected render() {
     dlog('route render');
-    dlog('css content: ', this.cssContent);
+    // dlog('css content: ', this.cssContent);
     dlog('css ready status: ', this.cssReady);
     dlog('module: ', this._url_module);
     dlog('module ready status: ', this.moduleReady);
@@ -131,8 +131,8 @@ export class Route extends LitElement {
 
     resultHTML =
       this.appendDirection === 'before'
-        ? html`${resultHTML}<slot></slot>`
-        : html`<slot></slot>${resultHTML}`;
+        ? html`<slot></slot>${resultHTML}`
+        : html`${resultHTML}<slot></slot>`;
 
     return resultHTML;
   }
@@ -224,6 +224,7 @@ export class Route extends LitElement {
 
       if (this.lazy && this.url && !module) {
         this.loadAssets();
+        dlog('await module, blocking updated');
         module = await this._url_module;
       }
 

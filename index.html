@@ -121,6 +121,15 @@
             </ul>
           </native-route>
         </li>
+
+        <div style="height: 16px"></div>
+
+        <li>
+          <a href="/append-direction/before">append before</a>
+        </li>
+        <li>
+          <a href="/append-direction/after">append after</a>
+        </li>
       </ul>
 
       <div
@@ -179,6 +188,17 @@
             <native-route path="3/basic" lazy url="@PUBLICK_PATH/vue3.js" shadowCSSUrl="@PUBLICK_PATH/vue3.css" custom-render></native-route>
           </native-route>
         </native-route>
+
+        <!-- append direction -->
+        <native-route path="/append-direction">
+          <native-route path="before" element="<strong>CENTER</strong>" append-direction="before">
+            <div slot>child before after</div>
+          </native-route>
+          <native-route path="after" element="<strong>CENTER</strong>">
+            <div slot>child append after</div>
+          </native-route>
+        </native-route>
+
       </div>
     </main>
   </body>
