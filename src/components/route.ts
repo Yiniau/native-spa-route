@@ -75,6 +75,9 @@ export class Route extends LitElement {
   @property({ type: String, attribute: 'css-url' })
   cssUrl: string = '';
 
+  @property({ type: Number })
+  cssDelayRender: number = 32;
+
   @state()
   private active: boolean = false;
 
@@ -99,7 +102,7 @@ export class Route extends LitElement {
     // after render css style block, delay 2 frame to render main content to avoid FOUC
     setTimeout(() => {
       this.moduleReady = 'fulfilled';
-    }, 32);
+    }, this.cssDelayRender);
   }
 
   protected render() {
@@ -235,6 +238,14 @@ export class Route extends LitElement {
     }
 
     this.active = isMatch;
+
+    if (!this.active) {
+      if (this.renderAfterReady && (this.shadowCSSUrl || this.cssUrl)) {
+        // reset module status
+        this.moduleReady = 'nothing';
+        this.cssReady = 'nothing';
+      }
+    }
     return;
   };
 
