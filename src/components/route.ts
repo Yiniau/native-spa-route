@@ -1,5 +1,5 @@
 import debug from 'debug';
-import { html, LitElement, } from 'lit';
+import { html, LitElement } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { unsafeHTML } from 'lit/directives/unsafe-html.js';
 
@@ -66,8 +66,8 @@ export class Route extends LitElement {
   @property({ type: String })
   shadowCSSUrl: string = '';
 
-  @property({ type: Boolean })
-  noWaitCSS: boolean = false;
+  // @property({ type: Boolean })
+  // noWaitCSS: boolean = false;
 
   /**
    * alias as shadowCSSUrl, more readable
@@ -95,38 +95,23 @@ export class Route extends LitElement {
   protected cssReady: 'nothing' | 'pending' | 'fulfilled' | 'rejected' =
     'nothing';
 
-  private _cssLoaded() {
-    dlog('css link loaded');
-    this.moduleReady = 'pending';
-    this.cssReady = 'fulfilled';
-    // after render css style block, delay 2 frame to render main content to avoid FOUC
-    setTimeout(() => {
-      this.moduleReady = 'fulfilled';
-    }, this.cssDelayRender);
-  }
+  @state()
+  protected cssContent: string = '';
 
   protected render() {
+    dlog('route render');
+    dlog('css content: ', this.cssContent);
+    dlog('css ready status: ', this.cssReady);
+    dlog('module: ', this._url_module);
+    dlog('module ready status: ', this.moduleReady);
     let resultHTML = html``;
     if (!this.active) {
       return resultHTML;
     }
 
     if (this.shadowCSSUrl || this.cssUrl) {
-      // resultHTML = html`<style>@import url(${this.cssUrl || this.shadowCSSUrl});</style>`;
-      if (!this.noWaitCSS && this.cssReady !== 'fulfilled') {
-        resultHTML = html`
-          <link
-            href="${this.shadowCSSUrl || this.cssUrl}"
-            rel="stylesheet"
-            type="text/css"
-            @load="${this._cssLoaded}"
-          />
-        `;
-      } else {
-        resultHTML = html`
-          <style>@import url(${this.shadowCSSUrl || this.cssUrl});</style>
-        `;
-      }
+      // prettier-ignore
+      resultHTML = html`<style>${this.cssContent}</style>`;
     }
 
     if (this.renderAfterReady) {
@@ -134,7 +119,7 @@ export class Route extends LitElement {
         return resultHTML;
       }
       if (this.shadowCSSUrl || this.cssUrl) {
-        if (this.cssReady !== 'fulfilled') {
+        if (this.cssReady !== 'fulfilled' && this.cssReady !== 'rejected') {
           return resultHTML;
         }
       }
@@ -149,23 +134,18 @@ export class Route extends LitElement {
         ? html`${resultHTML}<slot></slot>`
         : html`<slot></slot>${resultHTML}`;
 
-    // if (this.cssUrl || this.shadowCSSUrl) {
-    //   // prettier-ignore
-    //   ret = html`<style>@import url(${this.cssUrl || this.shadowCSSUrl});</style>${ret}`;
-    // }
-
     return resultHTML;
   }
 
-  private loadAssets() {
+  private async loadAssets() {
     let releaseLoadingLock: () => void;
     let rejectLoadingLock: () => void;
 
     const loadingLock = new Promise<void>((res, rej) => {
       let count = 1;
-      // if (this.shadowCSSUrl || this.cssUrl) {
-      //   count += 1;
-      // }
+      if (this.shadowCSSUrl || this.cssUrl) {
+        count += 1;
+      }
       function _res() {
         count -= 1;
         if (count <= 0) {
@@ -187,6 +167,15 @@ export class Route extends LitElement {
       this.moduleReady = 'pending';
       this._url_module = import(/* @vite-ignore */ url)
         .then((t) => {
+          // if (this.cssDelayRender) {
+          //   dlog('attach css delay render, set timeout to release module ready with ', this.cssDelayRender);
+          //   setTimeout(() => {
+          //     dlog('recover module ready status');
+          //     this.moduleReady = 'fulfilled';
+          //   }, this.cssDelayRender);
+          // } else {
+          //   this.moduleReady = 'fulfilled';
+          // }
           this.moduleReady = 'fulfilled';
           releaseLoadingLock();
           return t;
@@ -199,16 +188,24 @@ export class Route extends LitElement {
     }
 
     if (this.shadowCSSUrl || this.cssUrl) {
-      if (this.noWaitCSS) {
+      this.cssReady = 'pending';
+      try {
+        const css = await fetch(this.shadowCSSUrl || this.cssUrl, {
+          headers: { 'content-type': 'text' },
+        }).then((t) => t.text());
+        this.cssContent = css;
         this.cssReady = 'fulfilled';
-      } else {
-        this.cssReady = 'pending'
+        rejectLoadingLock();
+      } catch (error) {
+        console.error(error);
+        this.cssReady = 'rejected';
+        releaseLoadingLock();
       }
     }
 
     return loadingLock;
   }
-
+  
   private route_change_callback = () => {
     let _path = this.fullpath;
 
@@ -239,13 +236,6 @@ export class Route extends LitElement {
 
     this.active = isMatch;
 
-    if (!this.active) {
-      if (this.renderAfterReady && (this.shadowCSSUrl || this.cssUrl)) {
-        // reset module status
-        this.moduleReady = 'nothing';
-        this.cssReady = 'nothing';
-      }
-    }
     return;
   };
 
