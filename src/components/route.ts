@@ -1,8 +1,11 @@
+import debug from 'debug';
 import { html, LitElement, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { unsafeHTML } from 'lit/directives/unsafe-html.js';
 
 import { hook_route_change, unhook_route_change } from '@/lib/hooks';
+
+const dlog = debug('native-spa-route');
 
 export type RouteConfig = {
   path: string;
@@ -56,12 +59,21 @@ export class Route extends LitElement {
 
   @property({ type: Boolean, attribute: 'render-after-ready' })
   renderAfterReady: boolean = false;
-  
+
   @property({ type: Boolean, attribute: 'disable-shadow' })
   disableShadow: boolean = false;
 
-  @property({ type: String, })
+  @property({ type: String })
   shadowCSSUrl: string = '';
+
+  @property({ type: Boolean })
+  noWaitCSS: boolean = false;
+
+  /**
+   * alias as shadowCSSUrl, more readable
+   */
+  @property({ type: String, attribute: 'css-url' })
+  cssUrl: string = '';
 
   @state()
   private active: boolean = false;
@@ -76,43 +88,122 @@ export class Route extends LitElement {
   protected moduleReady: 'nothing' | 'pending' | 'fulfilled' | 'rejected' =
     'nothing';
 
-  render() {
+  @state()
+  protected cssReady: 'nothing' | 'pending' | 'fulfilled' | 'rejected' =
+    'nothing';
+
+  private _cssLoaded() {
+    dlog('css link loaded');
+    this.moduleReady = 'pending';
+    this.cssReady = 'fulfilled';
+    // after render css style block, delay 2 frame to render main content to avoid FOUC
+    setTimeout(() => {
+      this.moduleReady = 'fulfilled';
+    }, 32);
+  }
+
+  protected render() {
+    let resultHTML = html``;
     if (!this.active) {
-      return nothing;
+      return resultHTML;
     }
 
-    if (this.renderAfterReady && this.moduleReady !== 'fulfilled') {
-      return nothing;
+    if (this.shadowCSSUrl || this.cssUrl) {
+      // resultHTML = html`<style>@import url(${this.cssUrl || this.shadowCSSUrl});</style>`;
+      if (!this.noWaitCSS && this.cssReady !== 'fulfilled') {
+        resultHTML = html`
+          <link
+            href="${this.shadowCSSUrl || this.cssUrl}"
+            rel="stylesheet"
+            type="text/css"
+            @load="${this._cssLoaded}"
+          />
+        `;
+      } else {
+        resultHTML = html`
+          <style>@import url(${this.shadowCSSUrl || this.cssUrl});</style>
+        `;
+      }
     }
 
-    const content = this.customRender ? nothing : unsafeHTML(this.element);
-    let ret = this.appendDirection === 'before'
-      ? html`${content}<slot></slot>`
-      : html`<slot></slot>${content}`;
-    
-    if (this.shadowCSSUrl) {
-      ret = html`<style>@import url(${this.shadowCSSUrl});</style>${ret}`;
+    if (this.renderAfterReady) {
+      if (this.moduleReady !== 'fulfilled') {
+        return resultHTML;
+      }
+      if (this.shadowCSSUrl || this.cssUrl) {
+        if (this.cssReady !== 'fulfilled') {
+          return resultHTML;
+        }
+      }
     }
 
-    return ret;
+    if (!this.customRender) {
+      resultHTML = html`${resultHTML}${unsafeHTML(this.element)}`;
+    }
+
+    resultHTML =
+      this.appendDirection === 'before'
+        ? html`${resultHTML}<slot></slot>`
+        : html`<slot></slot>${resultHTML}`;
+
+    // if (this.cssUrl || this.shadowCSSUrl) {
+    //   // prettier-ignore
+    //   ret = html`<style>@import url(${this.cssUrl || this.shadowCSSUrl});</style>${ret}`;
+    // }
+
+    return resultHTML;
   }
 
   private loadAssets() {
+    let releaseLoadingLock: () => void;
+    let rejectLoadingLock: () => void;
+
+    const loadingLock = new Promise<void>((res, rej) => {
+      let count = 1;
+      // if (this.shadowCSSUrl || this.cssUrl) {
+      //   count += 1;
+      // }
+      function _res() {
+        count -= 1;
+        if (count <= 0) {
+          res();
+        }
+      }
+      function _rej() {
+        count -= 1;
+        if (count <= 0) {
+          rej();
+        }
+      }
+      releaseLoadingLock = _res;
+      rejectLoadingLock = _rej;
+    });
+
     const url = this.url;
     if (typeof url === 'string') {
       this.moduleReady = 'pending';
       this._url_module = import(/* @vite-ignore */ url)
         .then((t) => {
           this.moduleReady = 'fulfilled';
+          releaseLoadingLock();
           return t;
         })
         .catch((e) => {
           this.moduleReady = 'rejected';
+          rejectLoadingLock();
           throw e;
         });
-      return this._url_module;
     }
-    return null;
+
+    if (this.shadowCSSUrl || this.cssUrl) {
+      if (this.noWaitCSS) {
+        this.cssReady = 'fulfilled';
+      } else {
+        this.cssReady = 'pending'
+      }
+    }
+
+    return loadingLock;
   }
 
   private route_change_callback = () => {
@@ -149,13 +240,15 @@ export class Route extends LitElement {
 
   async updated(changedProperties: Map<string | number | symbol, unknown>) {
     if (changedProperties.has('active')) {
-      let module = this._url_module;
       if (!this.active) {
         return;
       }
 
+      let module = this._url_module;
+
       if (this.lazy && this.url && !module) {
-        module = await this.loadAssets() ?? undefined;
+        await this.loadAssets();
+        module = await this._url_module;
       }
 
       if (this.customRender === false) {

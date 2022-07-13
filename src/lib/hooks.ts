@@ -23,12 +23,20 @@ export function hook_a_link() {
 }
 
 export function hook_history_change(
-  cb?: (
-    type: 'push' | 'replace',
-    data: any,
-    unused: string,
-    url?: string | URL | null | undefined
-  ) => void
+  lifecycle?: {
+    before?: (
+      type: 'push' | 'replace',
+      data: any,
+      unused: string,
+      url?: string | URL | null | undefined
+    ) => void,
+    after?: (
+      type: 'push' | 'replace',
+      data: any,
+      unused: string,
+      url?: string | URL | null | undefined
+    ) => void
+  }
 ) {
   const prototype = Reflect.getPrototypeOf(history) as History;
   const originPushState = prototype.pushState;
@@ -40,6 +48,7 @@ export function hook_history_change(
     url?: string | URL | null | undefined
   ) {
     // console.log('pushState', data, unused, url);
+    lifecycle?.before?.('push', data, unused, url);
     originPushState.apply(this, [data, unused, url]);
     window.dispatchEvent(
       new CustomEvent('history:pushState', {
@@ -50,7 +59,7 @@ export function hook_history_change(
         },
       })
     );
-    cb?.('push', data, unused, url);
+    lifecycle?.after?.('push', data, unused, url);
   };
 
   History.prototype.replaceState = function replaceState(
@@ -59,6 +68,7 @@ export function hook_history_change(
     url?: string | URL | null | undefined
   ) {
     // console.log('replaceState', data, unused, url);
+    lifecycle?.before?.('replace', data, unused, url);
     originReplaceState.apply(this, [data, unused, url]);
     window.dispatchEvent(
       new CustomEvent('history:replaceState', {
@@ -69,7 +79,7 @@ export function hook_history_change(
         },
       })
     );
-    cb?.('replace', data, unused, url);
+    lifecycle?.after?.('replace', data, unused, url);
   };
 }
 
