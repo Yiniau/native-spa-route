@@ -35,7 +35,8 @@ export function hook_history_change(
       data: any,
       unused: string,
       url?: string | URL | null | undefined
-    ) => void
+    ) => void,
+    url_adapter?: (url: string | URL | null | undefined) => void,
   }
 ) {
   const prototype = Reflect.getPrototypeOf(history) as History;
@@ -47,6 +48,8 @@ export function hook_history_change(
     unused: string,
     url?: string | URL | null | undefined
   ) {
+    let _url = url;
+    _url = lifecycle?.url_adapter?.(_url) ?? url;
     // console.log('pushState', data, unused, url);
     lifecycle?.before?.('push', data, unused, url);
     originPushState.apply(this, [data, unused, url]);
@@ -68,6 +71,8 @@ export function hook_history_change(
     url?: string | URL | null | undefined
   ) {
     // console.log('replaceState', data, unused, url);
+    let _url = url;
+    _url = lifecycle?.url_adapter?.(_url) ?? url;
     lifecycle?.before?.('replace', data, unused, url);
     originReplaceState.apply(this, [data, unused, url]);
     window.dispatchEvent(
