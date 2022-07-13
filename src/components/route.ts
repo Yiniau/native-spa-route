@@ -1,5 +1,5 @@
 import debug from 'debug';
-import { html, LitElement, nothing } from 'lit';
+import { html, LitElement, } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { unsafeHTML } from 'lit/directives/unsafe-html.js';
 
