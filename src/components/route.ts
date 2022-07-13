@@ -137,31 +137,7 @@ export class Route extends LitElement {
     return resultHTML;
   }
 
-  private async loadAssets() {
-    let releaseLoadingLock: () => void;
-    let rejectLoadingLock: () => void;
-
-    const loadingLock = new Promise<void>((res, rej) => {
-      let count = 1;
-      if (this.shadowCSSUrl || this.cssUrl) {
-        count += 1;
-      }
-      function _res() {
-        count -= 1;
-        if (count <= 0) {
-          res();
-        }
-      }
-      function _rej() {
-        count -= 1;
-        if (count <= 0) {
-          rej();
-        }
-      }
-      releaseLoadingLock = _res;
-      rejectLoadingLock = _rej;
-    });
-
+  private loadAssets() {
     const url = this.url;
     if (typeof url === 'string') {
       this.moduleReady = 'pending';
@@ -177,12 +153,10 @@ export class Route extends LitElement {
           //   this.moduleReady = 'fulfilled';
           // }
           this.moduleReady = 'fulfilled';
-          releaseLoadingLock();
           return t;
         })
         .catch((e) => {
           this.moduleReady = 'rejected';
-          rejectLoadingLock();
           throw e;
         });
     }
@@ -190,22 +164,23 @@ export class Route extends LitElement {
     if (this.shadowCSSUrl || this.cssUrl) {
       this.cssReady = 'pending';
       try {
-        const css = await fetch(this.shadowCSSUrl || this.cssUrl, {
+        fetch(this.shadowCSSUrl || this.cssUrl, {
           headers: { 'content-type': 'text' },
-        }).then((t) => t.text());
-        this.cssContent = css;
-        this.cssReady = 'fulfilled';
-        rejectLoadingLock();
+        })
+          .then((t) => t.text())
+          .then((css) => {
+            this.cssContent = css;
+            this.cssReady = 'fulfilled';
+          });
       } catch (error) {
         console.error(error);
         this.cssReady = 'rejected';
-        releaseLoadingLock();
       }
     }
 
-    return loadingLock;
+    return;
   }
-  
+
   private route_change_callback = () => {
     let _path = this.fullpath;
 
@@ -248,7 +223,7 @@ export class Route extends LitElement {
       let module = this._url_module;
 
       if (this.lazy && this.url && !module) {
-        await this.loadAssets();
+        this.loadAssets();
         module = await this._url_module;
       }
 
