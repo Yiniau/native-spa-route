@@ -78,6 +78,13 @@ export class Route extends LitElement {
   @property({ type: Number })
   cssDelayRender: number = 32;
 
+  @property({ type: Function })
+  errorRender?: (error: Error) => any;
+
+  private log(...args: any[]) {
+    return dlog(`[${this.path}]`, ...args);
+  }
+
   @state()
   private active: boolean = false;
 
@@ -95,15 +102,15 @@ export class Route extends LitElement {
   protected cssReady: 'nothing' | 'pending' | 'fulfilled' | 'rejected' =
     'nothing';
 
-  @state()
+  @state({ hasChanged: () => false })
   protected cssContent: string = '';
 
   protected render() {
-    dlog('route render');
-    // dlog('css content: ', this.cssContent);
-    dlog('css ready status: ', this.cssReady);
-    dlog('module: ', this._url_module);
-    dlog('module ready status: ', this.moduleReady);
+    this.log('route render');
+    // this.log('css content: ', this.cssContent);
+    this.log('css ready status: ', this.cssReady);
+    this.log('module: ', this._url_module);
+    this.log('module ready status: ', this.moduleReady);
     let resultHTML = html``;
     if (!this.active) {
       return resultHTML;
@@ -144,20 +151,22 @@ export class Route extends LitElement {
       this._url_module = import(/* @vite-ignore */ url)
         .then((t) => {
           // if (this.cssDelayRender) {
-          //   dlog('attach css delay render, set timeout to release module ready with ', this.cssDelayRender);
+          //   this.log('attach css delay render, set timeout to release module ready with ', this.cssDelayRender);
           //   setTimeout(() => {
-          //     dlog('recover module ready status');
+          //     this.log('recover module ready status');
           //     this.moduleReady = 'fulfilled';
           //   }, this.cssDelayRender);
           // } else {
           //   this.moduleReady = 'fulfilled';
           // }
+          this.log('module load fulfilled');
           this.moduleReady = 'fulfilled';
           return t;
         })
         .catch((e) => {
+          console.error(e);
+          this.log('module load rejected');
           this.moduleReady = 'rejected';
-          throw e;
         });
     }
 
@@ -214,28 +223,33 @@ export class Route extends LitElement {
     return;
   };
 
-  async updated(changedProperties: Map<string | number | symbol, unknown>) {
-    if (changedProperties.has('active')) {
-      if (!this.active) {
-        return;
+  private async _render_lazy_url_module() {
+    if (this.cssReady !== 'fulfilled' && this.cssReady !== 'rejected') return;
+    if (this.moduleReady !== 'fulfilled' && this.moduleReady !== 'rejected')
+      return;
+
+    this.log('all source load end, continue logic');
+    let render;
+    if (this.moduleReady === 'rejected') {
+      if (this.errorRender) {
+        render = this.errorRender;
+      } else {
+        throw new Error(
+          'No component render found, and error render not found'
+        );
       }
-
-      let module = this._url_module;
-
-      if (this.lazy && this.url && !module) {
-        this.loadAssets();
-        dlog('await module, blocking updated');
-        module = await this._url_module;
+    }
+    if (this.moduleReady === 'fulfilled') {
+      let module = await this._url_module;
+      if (typeof this.customRender === 'string') {
+        render = module[this.customRender];
+      } else if (this.customRender) {
+        render = module['render'];
+      } else {
+        // do nothing
       }
-
-      if (this.customRender === false) {
-        return;
-      }
-
-      if (!module) {
-        throw new Error('No component module found');
-      }
-
+    }
+    if (render) {
       const customRenderDom = document.createElement('div');
 
       if (this.appendDirection === 'before') {
@@ -251,13 +265,38 @@ export class Route extends LitElement {
         this.renderRoot.appendChild(customRenderDom);
       }
 
-      (await module)[
-        typeof this.customRender === 'string'
-          ? this.customRender === ''
-            ? 'render'
-            : this.customRender
-          : 'render'
-      ](customRenderDom);
+      render(customRenderDom);
+    }
+  }
+
+  async updated(changedProperties: Map<string | number | symbol, unknown>) {
+    if (changedProperties.has('active')) {
+      if (this.active) {
+        this.log('attach route active');
+
+        if (
+          (!this._url_module ||
+            this.moduleReady === 'nothing' ||
+            this.cssReady === 'nothing') &&
+          this.lazy
+        ) {
+          this.log('in lazy mode, some source not loaded, call loadAssets');
+          this.loadAssets();
+        } else {
+          this._render_lazy_url_module();
+        }
+      }
+    }
+
+    if (changedProperties.has('moduleReady')) {
+      if (changedProperties.get('moduleReady') === 'pending') {
+        this._render_lazy_url_module();
+      }
+    }
+    if (changedProperties.has('cssReady')) {
+      if (changedProperties.get('cssReady') === 'pending') {
+        this._render_lazy_url_module();
+      }
     }
 
     if (changedProperties.has('path')) {
