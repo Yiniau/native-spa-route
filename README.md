@@ -73,9 +73,9 @@ function hook_route_change(callback: (e: HistoryChangeEvent) => void) {
 </native-route>
 ```
 
-if this module could write content as child, like `<native-route>content here </native-route>`
+If this module could write content as child, like `<native-route> content here </native-route>`
 
-Sure, that is possible. But you need to do some extra work to make it look like good.
+Of course it works. But you need to do extra work to make them perform better.
 
 Becouse the Broswer will take unregisted component as `HTMLUnknowElement`, the content of them will visibale.
 So you need to hidden them by css:
@@ -179,13 +179,22 @@ example:
 <native-route disable-shadow></native-route>
 ```
 
+## Redirect
+
+```typescript
+import { redirect } from 'native-spa-route';
+// ...
+redirect('/', '/other/path');
+// ...
+```
+
 ## Online Demo
 
 ![Online Demo]([https://](https://native-spa-route.vercel.app/))
 
 ## next step plan
 
-1. [ ] implament `<native-redirect from="/" to="/home"></native-redirect>` component
+1. [x] ~~implament `<native-redirect from="/" to="/home"></native-redirect>` component~~ implament redirect api
 2. [ ] support scoped route to avoud global history api change.
 
 ```html
