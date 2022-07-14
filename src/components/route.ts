@@ -224,7 +224,9 @@ export class Route extends LitElement {
   };
 
   private async _render_url_module() {
-    if (this.cssReady !== 'fulfilled' && this.cssReady !== 'rejected') return;
+    if (this.shadowCSSUrl && this.cssUrl) {
+      if (this.cssReady !== 'fulfilled' && this.cssReady !== 'rejected') return;
+    }
     if (this.moduleReady !== 'fulfilled' && this.moduleReady !== 'rejected')
       return;
 
