@@ -1,5 +1,5 @@
 import debug from 'debug';
-import { html, LitElement } from 'lit';
+import { html, LitElement, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { unsafeHTML } from 'lit/directives/unsafe-html.js';
 
@@ -66,8 +66,11 @@ export class Route extends LitElement {
   @property({ type: String })
   shadowCSSUrl: string = '';
 
-  // @property({ type: Boolean })
-  // noWaitCSS: boolean = false;
+  @property({ type: String })
+  loadingElement?: string;
+
+  @property({ type: Number })
+  lockLoadingTime?: number;
 
   /**
    * alias as shadowCSSUrl, more readable
@@ -79,7 +82,7 @@ export class Route extends LitElement {
   cssDelayRender: number = 32;
 
   @property({ type: Function })
-  errorRender?: (error: Error) => any;
+  errorRender?: (error: Error) => string;
 
   private log(...args: any[]) {
     return dlog(`[${this.path}]`, ...args);
@@ -105,33 +108,79 @@ export class Route extends LitElement {
   @state({ hasChanged: () => false })
   protected cssContent: string = '';
 
+  private renderLoading() {
+    return html`
+      <div
+        style="display: flex; align-items: center; justify-content: space-around;width: 100%; height: 100%;"
+      >
+        ${unsafeHTML(this.loadingElement)}
+      </div>
+    `;
+  }
+
   protected render() {
     this.log('route render');
+    let resultHTML = html``;
+    if (!this.active) {
+      this.log('not active, return empty');
+      return nothing;
+    }
+
     // this.log('css content: ', this.cssContent);
     this.log('css ready status: ', this.cssReady);
     this.log('module: ', this._url_module);
     this.log('module ready status: ', this.moduleReady);
-    let resultHTML = html``;
-    if (!this.active) {
-      return resultHTML;
+
+    let isCssExsit = this.shadowCSSUrl || this.cssUrl;
+
+    // error render handle
+    if (this.errorRender) {
+      let errorContent = null;
+
+      if (this.moduleReady === 'rejected') {
+        errorContent = new Error('module load rejected');
+      }
+      if (isCssExsit) {
+        if (this.cssReady === 'rejected') {
+          errorContent = new Error('css load rejected');
+        }
+      }
+
+      if (errorContent) {
+        const errorElement = this.errorRender(errorContent);
+        if (typeof errorElement !== 'string') {
+          return resultHTML;
+        } else {
+          return html`${unsafeHTML(errorElement)}`;
+        }
+      }
     }
 
-    if (this.shadowCSSUrl || this.cssUrl) {
+    // if not error, make style content be parsed fisrt
+    if (isCssExsit) {
       // prettier-ignore
       resultHTML = html`<style>${this.cssContent}</style>`;
     }
 
+    // loading render handle
     if (this.renderAfterReady) {
       if (this.moduleReady !== 'fulfilled') {
+        if (this.loadingElement) {
+          return html`${resultHTML}${this.renderLoading()}`;
+        }
         return resultHTML;
       }
-      if (this.shadowCSSUrl || this.cssUrl) {
-        if (this.cssReady !== 'fulfilled' && this.cssReady !== 'rejected') {
+      if (isCssExsit) {
+        if (this.cssReady !== 'fulfilled') {
+          if (this.loadingElement) {
+            return html`${resultHTML}${this.renderLoading()}`;
+          }
           return resultHTML;
         }
       }
     }
 
+    // source ready, render real content
     if (!this.customRender) {
       resultHTML = html`${resultHTML}${unsafeHTML(this.element)}`;
     }
@@ -145,9 +194,11 @@ export class Route extends LitElement {
   }
 
   private loadAssets() {
+    this.log('start load assets');
     const url = this.url;
     if (typeof url === 'string') {
       this.moduleReady = 'pending';
+      const loadStartTime = Date.now();
       this._url_module = import(/* @vite-ignore */ url)
         .then((t) => {
           // if (this.cssDelayRender) {
@@ -160,7 +211,19 @@ export class Route extends LitElement {
           //   this.moduleReady = 'fulfilled';
           // }
           this.log('module load fulfilled');
-          this.moduleReady = 'fulfilled';
+          if (this.lockLoadingTime) {
+            const _now = Date.now();
+            const _now_d = _now - loadStartTime;
+            if (_now_d < this.lockLoadingTime) {
+              setTimeout(() => {
+                this.moduleReady = 'fulfilled';
+              }, this.lockLoadingTime - _now_d);
+            } else {
+              this.moduleReady = 'fulfilled';
+            }
+          } else {
+            this.moduleReady = 'fulfilled';
+          }
           return t;
         })
         .catch((e) => {
@@ -277,10 +340,10 @@ export class Route extends LitElement {
         this.log('attach route active');
 
         if (
+          this.lazy &&
           (!this._url_module ||
-            this.moduleReady === 'nothing' ||
-            this.cssReady === 'nothing') &&
-          this.lazy
+            this.moduleReady !== 'fulfilled' ||
+            (this.shadowCSSUrl || this.cssUrl) && this.cssReady !== 'fulfilled')
         ) {
           this.log('in lazy mode, some source not loaded, call loadAssets');
           this.loadAssets();
