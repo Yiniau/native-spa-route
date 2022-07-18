@@ -38,7 +38,7 @@ function getFullPath(url: string, node: HTMLElement): string {
 @customElement('native-route')
 export class Route extends LitElement {
   static styles = css`
-    :host .loading-wrapper {
+    .loading-container {
       display: flex;
       align-items: center;
       justify-content: space-around;
@@ -206,7 +206,7 @@ export class Route extends LitElement {
 
   private renderLoading() {
     return html`
-      <div class="loading-wrapper">${unsafeHTML(this.loadingElement)}</div>
+      <div part="loading-container" class="loading-container">${unsafeHTML(this.loadingElement)}</div>
     `;
   }
 
@@ -228,8 +228,10 @@ export class Route extends LitElement {
             ? this.renderLoading()
             : !this.customRender
             ? this.renderElement()
-            : // : html`<div data-render="custom-render"></div>`}
-              html`<div class="custom-render-container"></div>`}
+            : html`<div
+                part="custom-render-container"
+                class="custom-render-container"
+              ></div>`}
           ${this.appendDirection !== 'before' ? html`<slot></slot>` : ''}
         `;
     return this.drop ? content : html`${cache(content)}`;

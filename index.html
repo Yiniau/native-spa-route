@@ -145,13 +145,17 @@
         </li>
 
         <div style="height: 16px"></div>
-
+        
         <li>
           <a href="/append-direction/before">append before</a>
         </li>
         <li>
           <a href="/append-direction/after">append after</a>
         </li>
+        
+        <div style="height: 16px"></div>
+
+        <li><a href="/loading">loading status</a></li>
       </ul>
 
       <div
@@ -232,6 +236,16 @@
             <div slot>child append after</div>
           </native-route>
         </native-route>
+        
+        <native-route
+          path="/loading"
+          lazy
+          url="//cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.0.0-beta.74/dist/components/button/button.js"
+          css-url="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.0.0-beta.77/dist/themes/light.css"
+          render-after-ready
+          loadingElement="<span>will show loading... 50000ms</span>"
+          lockLoadingTime="50000"
+        ></native-route>
       </div>
     </main>
   </body>
