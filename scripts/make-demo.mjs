@@ -27,7 +27,7 @@ await esbuild.build({
 
 let publicPath = '/dist'
 if (process.env.IN_LOCAL) {
-	publicPath = 'http://localhost:3001/dist';
+	publicPath = 'http://localhost:3000/dist';
 }
 
 // react 17 build
