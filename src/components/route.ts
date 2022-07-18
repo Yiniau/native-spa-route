@@ -1,7 +1,8 @@
 import debug from 'debug';
-import { html, LitElement, nothing } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
+import { css, html, LitElement, nothing } from 'lit';
+import { customElement, property, query, state } from 'lit/decorators.js';
 import { unsafeHTML } from 'lit/directives/unsafe-html.js';
+import { cache } from 'lit/directives/cache.js';
 
 import { hook_route_change, unhook_route_change } from '@/lib/hooks';
 
@@ -36,6 +37,16 @@ function getFullPath(url: string, node: HTMLElement): string {
 
 @customElement('native-route')
 export class Route extends LitElement {
+  static styles = css`
+    :host .loading-wrapper {
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      width: 100%;
+      height: 100%;
+    }
+  `;
+
   @property({ type: String })
   path: string = '';
 
@@ -54,7 +65,29 @@ export class Route extends LitElement {
   @property({ type: String, attribute: 'append-direction' })
   appendDirection: 'before' | 'after' = 'after';
 
-  @property({ attribute: 'custom-render' })
+  @property({
+    attribute: 'custom-render',
+    converter: {
+      fromAttribute: (value, type) => {
+        if (value === '') {
+          return true;
+        } else {
+          return value;
+        }
+      },
+      toAttribute: (value, type) => {
+        if (typeof value !== 'string') {
+          if (!value) {
+            return 'false';
+          } else {
+            return '';
+          }
+        } else {
+          return value;
+        }
+      },
+    },
+  })
   customRender: boolean | string = false;
 
   @property({ type: Boolean, attribute: 'render-after-ready' })
@@ -84,6 +117,9 @@ export class Route extends LitElement {
   @property({ type: Function })
   errorRender?: (error: Error) => string;
 
+  @property({ type: Boolean })
+  drop: boolean = false;
+
   private log(...args: any[]) {
     return dlog(`[${this.path}]`, ...args);
   }
@@ -108,89 +144,95 @@ export class Route extends LitElement {
   @state({ hasChanged: () => false })
   protected cssContent: string = '';
 
-  private renderLoading() {
-    return html`
-      <div
-        style="display: flex; align-items: center; justify-content: space-around;width: 100%; height: 100%;"
-      >
-        ${unsafeHTML(this.loadingElement)}
-      </div>
-    `;
+  private isCssExsit() {
+    return this.shadowCSSUrl || this.cssUrl;
   }
 
-  protected render() {
-    this.log('route render');
-    let resultHTML = html``;
-    if (!this.active) {
-      this.log('not active, return empty');
-      return nothing;
-    }
+  private isActive() {
+    return this.active;
+  }
 
-    // this.log('css content: ', this.cssContent);
-    this.log('css ready status: ', this.cssReady);
-    this.log('module: ', this._url_module);
-    this.log('module ready status: ', this.moduleReady);
-
-    let isCssExsit = this.shadowCSSUrl || this.cssUrl;
-
-    // error render handle
+  private isRenderError() {
     if (this.errorRender) {
-      let errorContent = null;
-
-      if (this.moduleReady === 'rejected') {
-        errorContent = new Error('module load rejected');
-      }
-      if (isCssExsit) {
-        if (this.cssReady === 'rejected') {
-          errorContent = new Error('css load rejected');
-        }
-      }
-
-      if (errorContent) {
-        const errorElement = this.errorRender(errorContent);
-        if (typeof errorElement !== 'string') {
-          return resultHTML;
-        } else {
-          return html`${unsafeHTML(errorElement)}`;
-        }
+      if (
+        this.moduleReady === 'rejected' ||
+        ((this.shadowCSSUrl || this.cssUrl) && this.cssReady === 'rejected')
+      ) {
+        return true;
       }
     }
+    return false;
+  }
 
-    // if not error, make style content be parsed fisrt
-    if (isCssExsit) {
-      // prettier-ignore
-      resultHTML = html`<style>${this.cssContent}</style>`;
-    }
-
-    // loading render handle
+  private isRenderLoading() {
     if (this.renderAfterReady) {
       if (this.moduleReady !== 'fulfilled') {
         if (this.loadingElement) {
-          return html`${resultHTML}${this.renderLoading()}`;
+          return true;
         }
-        return resultHTML;
+        return false;
       }
-      if (isCssExsit) {
+      if (this.isCssExsit()) {
         if (this.cssReady !== 'fulfilled') {
           if (this.loadingElement) {
-            return html`${resultHTML}${this.renderLoading()}`;
+            return true;
           }
-          return resultHTML;
+          return false;
         }
       }
     }
+    return false;
+  }
 
-    // source ready, render real content
-    if (!this.customRender) {
-      resultHTML = html`${resultHTML}${unsafeHTML(this.element)}`;
+  private renderErrorContent() {
+    if (!this.errorRender) return nothing;
+
+    if (this.moduleReady === 'rejected') {
+      return html`${unsafeHTML(
+        this.errorRender(new Error('module load rejected'))
+      )}`;
     }
 
-    resultHTML =
-      this.appendDirection === 'before'
-        ? html`<slot></slot>${resultHTML}`
-        : html`${resultHTML}<slot></slot>`;
+    if (this.isCssExsit()) {
+      if (this.cssReady === 'rejected') {
+        return html`${unsafeHTML(
+          this.errorRender(new Error('css load rejected'))
+        )}`;
+      }
+    }
 
-    return resultHTML;
+    return nothing;
+  }
+
+  private renderLoading() {
+    return html`
+      <div class="loading-wrapper">${unsafeHTML(this.loadingElement)}</div>
+    `;
+  }
+
+  private renderElement() {
+    return html`${unsafeHTML(this.element)}`;
+  }
+
+  protected render() {
+    const content = !this.isActive()
+      ? nothing
+      : this.isRenderError()
+      ? this.renderErrorContent()
+      : html`
+          ${this.appendDirection === 'before' ? html`<slot></slot>` : ''}
+          <style>
+            ${this.cssContent}
+          </style>
+          ${this.isRenderLoading()
+            ? this.renderLoading()
+            : !this.customRender
+            ? this.renderElement()
+            : // : html`<div data-render="custom-render"></div>`}
+              html`<div class="custom-render-container"></div>`}
+          ${this.appendDirection !== 'before' ? html`<slot></slot>` : ''}
+        `;
+    return this.drop ? content : html`${cache(content)}`;
   }
 
   private loadAssets() {
@@ -201,15 +243,6 @@ export class Route extends LitElement {
       const loadStartTime = Date.now();
       this._url_module = import(/* @vite-ignore */ url)
         .then((t) => {
-          // if (this.cssDelayRender) {
-          //   this.log('attach css delay render, set timeout to release module ready with ', this.cssDelayRender);
-          //   setTimeout(() => {
-          //     this.log('recover module ready status');
-          //     this.moduleReady = 'fulfilled';
-          //   }, this.cssDelayRender);
-          // } else {
-          //   this.moduleReady = 'fulfilled';
-          // }
           this.log('module load fulfilled');
           if (this.lockLoadingTime) {
             const _now = Date.now();
@@ -236,9 +269,7 @@ export class Route extends LitElement {
     if (this.shadowCSSUrl || this.cssUrl) {
       this.cssReady = 'pending';
       try {
-        fetch(this.shadowCSSUrl || this.cssUrl, {
-          headers: { 'content-type': 'text' },
-        })
+        fetch(this.shadowCSSUrl || this.cssUrl)
           .then((t) => t.text())
           .then((css) => {
             this.cssContent = css;
@@ -286,6 +317,10 @@ export class Route extends LitElement {
     return;
   };
 
+  // @query('div.custom-render-container', true)
+  @query('div.custom-render-container', false)
+  cacheCustomRenderDom?: HTMLDivElement;
+
   private async _render_url_module() {
     if (this.shadowCSSUrl && this.cssUrl) {
       if (this.cssReady !== 'fulfilled' && this.cssReady !== 'rejected') return;
@@ -306,6 +341,8 @@ export class Route extends LitElement {
     }
     if (this.moduleReady === 'fulfilled') {
       let module = await this._url_module;
+      this.log('module: ', module);
+      this.log('this.customRender: ', this.customRender);
       if (typeof this.customRender === 'string') {
         render = module[this.customRender];
       } else if (this.customRender) {
@@ -314,23 +351,21 @@ export class Route extends LitElement {
         // do nothing
       }
     }
+    this.log('render function: ', render);
     if (render) {
-      const customRenderDom = document.createElement('div');
-
-      if (this.appendDirection === 'before') {
-        if (!(this.renderRoot.firstElementChild instanceof HTMLElement)) {
-          this.renderRoot.appendChild(customRenderDom);
-        } else {
-          this.renderRoot.insertBefore(
-            this.renderRoot.firstElementChild,
-            customRenderDom
-          );
+      await this.updateComplete; // wait dom render end
+      const customRenderDom = this.cacheCustomRenderDom as HTMLDivElement;
+      if (!this.drop) {
+        if (!customRenderDom?.children?.length) {
+          render(customRenderDom);
         }
       } else {
-        this.renderRoot.appendChild(customRenderDom);
+        customRenderDom.innerHTML = '';
+        const inner = document.createElement('div');
+        customRenderDom.appendChild(inner);
+        render(inner);
       }
-
-      render(customRenderDom);
+      return;
     }
   }
 
@@ -343,7 +378,8 @@ export class Route extends LitElement {
           this.lazy &&
           (!this._url_module ||
             this.moduleReady !== 'fulfilled' ||
-            (this.shadowCSSUrl || this.cssUrl) && this.cssReady !== 'fulfilled')
+            ((this.shadowCSSUrl || this.cssUrl) &&
+              this.cssReady !== 'fulfilled'))
         ) {
           this.log('in lazy mode, some source not loaded, call loadAssets');
           this.loadAssets();

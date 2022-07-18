@@ -78,6 +78,28 @@
         <li><a href="/root/all">nest path: root/all</a></li>
 
         <div style="height: 16px"></div>
+        
+        <li>
+          <a href="/cache-and-drop">cache and drop</a>
+        </li>
+        <native-route path="/cache-and-drop">
+          <ul>
+            <li>
+              <a href="/cache-and-drop/cache/input1">cache input 1</a>
+            </li>
+            <li>
+              <a href="/cache-and-drop/cache/input2">cache input 2</a>
+            </li>
+            <li>
+              <a href="/cache-and-drop/drop/input1">drop input 1 (will drop input value after switch route)</a>
+            </li>
+            <li>
+              <a href="/cache-and-drop/drop/input2">drop input 2 (will drop input value after switch route)</a>
+            </li>
+          </ul>
+        </native-route>
+        
+        <div style="height: 16px"></div>
 
         <li>
           <a href="/lazy">lazy demo</a>
@@ -99,7 +121,7 @@
         <div style="height: 16px"></div>
 
         <li>
-          <a href="/custom-"
+          <a href="/custom-render"
             >custom render demo, this could be use to render react/vue/other
             render lib content<br/>
 						<strong>If you are in a local environment, you need to additionally run the <code>pnpm run dev:demo</code> command</strong>
@@ -116,7 +138,7 @@
                 <a href="/custom-render/react/17/with-css">react 17 with css</a>
               </li>
               <li>
-                <a href="/custom-render/vue/3/basic">vue 3 demo</a>
+                <a href="/custom-render/vue/3/basic">vue 3 demo (enable drop)</a>
               </li>
             </ul>
           </native-route>
@@ -157,11 +179,23 @@
           </native-route>
         </native-route>
 
+        <native-route path="/cache-and-drop">
+          <native-route path="cache">
+            <native-route path="input1" element="<input>"></native-route>
+            <native-route path="input2" element="<input>"></native-route>
+          </native-route>
+          <native-route path="drop">
+            <native-route path="input1" drop element="<input>"></native-route>
+            <native-route path="input2" drop element="<input>"></native-route>
+          </native-route>
+        </native-route>
+
 				<!-- lazy useage -->
         <native-route path="/lazy/sl">
           <native-route
             path="button"
             url="//cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.0.0-beta.74/dist/components/button/button.js"
+            css-url="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.0.0-beta.77/dist/themes/light.css"
             element='<sl-button>Button</sl-button><sl-button variant="primary">Primary</sl-button><sl-button variant="neutral" loading>Neutral</sl-button>'
             lazy
           >
@@ -185,7 +219,7 @@
             <native-route path="17/with-css" lazy url="@PUBLICK_PATH/react17.js" custom-render="withCss" shadowCSSUrl="@PUBLICK_PATH/react17.css"></native-route>
           </native-route>
           <native-route path="vue">
-            <native-route path="3/basic" lazy url="@PUBLICK_PATH/vue3.js" shadowCSSUrl="@PUBLICK_PATH/vue3.css" custom-render></native-route>
+            <native-route drop path="3/basic" lazy url="@PUBLICK_PATH/vue3.js" shadowCSSUrl="@PUBLICK_PATH/vue3.css" custom-render></native-route>
           </native-route>
         </native-route>
 
@@ -198,7 +232,6 @@
             <div slot>child append after</div>
           </native-route>
         </native-route>
-
       </div>
     </main>
   </body>
