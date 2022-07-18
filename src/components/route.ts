@@ -68,14 +68,14 @@ export class Route extends LitElement {
   @property({
     attribute: 'custom-render',
     converter: {
-      fromAttribute: (value, type) => {
+      fromAttribute: (value) => {
         if (value === '') {
           return true;
         } else {
           return value;
         }
       },
-      toAttribute: (value, type) => {
+      toAttribute: (value) => {
         if (typeof value !== 'string') {
           if (!value) {
             return 'false';
