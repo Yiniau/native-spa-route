@@ -60,16 +60,16 @@ function hook_route_change(callback: (e: HistoryChangeEvent) => void) {
 
 ```html
 <native-route path="/">
-	<!-- exact case, only active while pathname full match /root -->
-	<native-route
-		path="root"
-		exact
-		element="exact /root path route here"
-	></native-route>
-	<native-route path="root" element="<div>ROOT HERE</div>">
-		<native-route path="all" element="<div>ALL HERE</div>">
-		</native-route>
-	</native-route>
+  <!-- exact case, only active while pathname full match /root -->
+  <native-route
+    path="root"
+    exact
+    element="exact /root path route here"
+  ></native-route>
+  <native-route path="root" element="<div>ROOT HERE</div>">
+    <native-route path="all" element="<div>ALL HERE</div>">
+    </native-route>
+  </native-route>
 </native-route>
 ```
 
@@ -82,10 +82,10 @@ So you need to hidden them by css:
 
 ```css
 native-route {
-	display: none;
+  display: none;
 }
 native-route:defined {
-	display: block;
+  display: block;
 }
 ```
 
@@ -95,15 +95,15 @@ example code:
 
 ```html
 <native-route path="/lazy">
-	<ul>
-		<li><a href="/lazy/sl/button">@shoelace-style/shoelace Button</a></li>
-		<li>
-			<a href="/lazy/sl/ready_button">
-				render shoelace Button after module ready, disable cache to
-				get clear effect
-			</a>
-		</li>
-	</ul>
+  <ul>
+    <li><a href="/lazy/sl/button">@shoelace-style/shoelace Button</a></li>
+    <li>
+      <a href="/lazy/sl/ready_button">
+        render shoelace Button after module ready, disable cache to
+        get clear effect
+      </a>
+    </li>
+  </ul>
 </native-route>
 ```
 
