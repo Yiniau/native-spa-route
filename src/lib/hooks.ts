@@ -21,13 +21,13 @@ export function hook_a_link() {
 
 export function hook_history_change(lifecycle?: {
   before?: (
-    type: 'push' | 'replace' | 'back',
+    type: 'push' | 'replace' | 'back' | 'forward' | 'go',
     data: any,
     unused: string,
     url?: string | URL | null | undefined
   ) => void;
   after?: (
-    type: 'push' | 'replace' | 'back',
+    type: 'push' | 'replace' | 'back' | 'forward' | 'go',
     data: any,
     unused: string,
     url?: string | URL | null | undefined
@@ -35,10 +35,8 @@ export function hook_history_change(lifecycle?: {
   url_adapter?: (url: string | URL | null | undefined) => void;
 }) {
   const prototype = Reflect.getPrototypeOf(history) as History;
+  
   const originPushState = prototype.pushState;
-  const originReplaceState = prototype.replaceState;
-  const originBack = prototype.back;
-
   History.prototype.pushState = function pushState(
     data: any,
     unused: string,
@@ -61,6 +59,7 @@ export function hook_history_change(lifecycle?: {
     lifecycle?.after?.('push', data, unused, _url);
   };
 
+  const originReplaceState = prototype.replaceState;
   History.prototype.replaceState = function replaceState(
     data: any,
     unused: string,
@@ -83,6 +82,7 @@ export function hook_history_change(lifecycle?: {
     lifecycle?.after?.('replace', data, unused, _url);
   };
 
+  const originBack = prototype.back;
   History.prototype.back = function back() {
     lifecycle?.before?.('back', null, '', null);
     originBack.apply(this, []);
@@ -92,6 +92,32 @@ export function hook_history_change(lifecycle?: {
       })
     );
     lifecycle?.after?.('back', null, '', null);
+  };
+
+  const originForward = prototype.forward;
+  History.prototype.forward = function forward() {
+    lifecycle?.before?.('forward', null, '', null);
+    originForward.apply(this, []);
+    window.dispatchEvent(
+      new CustomEvent('history:forward', {
+        detail: {},
+      })
+    );
+    lifecycle?.after?.('forward', null, '', null);
+  };
+  
+  const originGo = prototype.go;
+  History.prototype.go = function go(delta?: number) {
+    lifecycle?.before?.('go', null, '', null);
+    originGo.apply(this, [delta]);
+    window.dispatchEvent(
+      new CustomEvent('history:go', {
+        detail: {
+          delta,
+        },
+      })
+    );
+    lifecycle?.after?.('go', null, '', null);
   };
 }
 
@@ -105,13 +131,17 @@ export function hook_route_change(callback: (e: HistoryChangeEvent) => void) {
   window.addEventListener('history:pushState', callback as EventListener);
   window.addEventListener('history:replaceState', callback as EventListener);
   window.addEventListener('history:back', callback as EventListener);
+  window.addEventListener('history:forward', callback as EventListener);
+  window.addEventListener('history:go', callback as EventListener);
   window.addEventListener('popstate', callback as EventListener, false);
 }
 
 export function unhook_route_change(callback: (e: HistoryChangeEvent) => void) {
   window.removeEventListener('history:pushState', callback as EventListener);
   window.removeEventListener('history:replaceState', callback as EventListener);
-  window.addEventListener('history:back', callback as EventListener);
+  window.removeEventListener('history:back', callback as EventListener);
+  window.removeEventListener('history:forward', callback as EventListener);
+  window.removeEventListener('history:go', callback as EventListener);
   window.removeEventListener('popstate', callback as EventListener, false);
 }
 
