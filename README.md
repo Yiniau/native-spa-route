@@ -36,11 +36,8 @@ export function hook_history_change(
 ) {
   const prototype = Reflect.getPrototypeOf(history) as History;
   const originPushState = prototype.pushState;
-  const originReplaceState = prototype.replaceState;
-
   History.prototype.pushState = function pushState(...) {...};
-
-  History.prototype.replaceState = function replaceState(...) {...};
+  // ... other function
 }
 ```
 
@@ -52,6 +49,9 @@ EVEN! You can use the `history:replaceState` event and `history:pushState` event
 function hook_route_change(callback: (e: HistoryChangeEvent) => void) {
   window.addEventListener('history:pushState', callback as EventListener);
   window.addEventListener('history:replaceState', callback as EventListener);
+  window.addEventListener('history:back', callback as EventListener);
+  window.addEventListener('history:forward', callback as EventListener);
+  window.addEventListener('history:go', callback as EventListener);
   window.addEventListener('popstate', callback as EventListener, false);
 }
 ```
@@ -116,21 +116,21 @@ Those `a` tags only show while `/^\/lazy/.test(location.pathname) === true`.
 ```html
 <!-- lazy useage -->
 <native-route path="/lazy/sl">
-	<native-route
-		path="button"
-		url="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.0.0-beta.74/dist/components/button/button.js"
-		element='<sl-button>Button</sl-button><sl-button variant="primary">Primary</sl-button><sl-button variant="neutral" loading>Neutral</sl-button>'
-		lazy
-	>
-	</native-route>
-	<native-route
-		path="ready_button"
-		url="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.0.0-beta.74/dist/components/button/button.js"
-		element='<sl-button>Render After Ready Button</sl-button><sl-button variant="primary">Primary</sl-button><sl-button variant="neutral" loading>Neutral</sl-button>'
-		render-after-ready
-		lazy
-	>
-	</native-route>
+  <native-route
+    path="button"
+    url="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.0.0-beta.74/dist/components/button/button.js"
+    element='<sl-button>Button</sl-button><sl-button variant="primary">Primary</sl-button><sl-button variant="neutral" loading>Neutral</sl-button>'
+    lazy
+  >
+  </native-route>
+  <native-route
+    path="ready_button"
+    url="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.0.0-beta.74/dist/components/button/button.js"
+    element='<sl-button>Render After Ready Button</sl-button><sl-button variant="primary">Primary</sl-button><sl-button variant="neutral" loading>Neutral</sl-button>'
+    render-after-ready
+    lazy
+  >
+  </native-route>
 </native-route>
 ```
 
@@ -142,14 +142,14 @@ this could be use to render react/vue/other render lib content.
 
 ```html
 <native-route path="/custom-render">
-	<native-route path="react">
-		<native-route path="17/basic" lazy url="@PUBLICK_PATH/react17.js" custom-render></native-route>
-		<native-route path="17/custom-render-name" lazy url="@PUBLICK_PATH/react17.js" custom-render="customRenderFunction"></native-route>
-		<native-route path="17/with-css" lazy url="@PUBLICK_PATH/react17.js" custom-render="withCss" shadowCSSUrl="@PUBLICK_PATH/react17.css"></native-route>
-	</native-route>
-	<native-route path="vue">
-		<native-route path="3/basic" lazy url="@PUBLICK_PATH/vue3.js" shadowCSSUrl="@PUBLICK_PATH/vue3.css" custom-render></native-route>
-	</native-route>
+  <native-route path="react">
+    <native-route path="17/basic" lazy url="@PUBLICK_PATH/react17.js" custom-render></native-route>
+    <native-route path="17/custom-render-name" lazy url="@PUBLICK_PATH/react17.js" custom-render="customRenderFunction"></native-route>
+    <native-route path="17/with-css" lazy url="@PUBLICK_PATH/react17.js" custom-render="withCss" shadowCSSUrl="@PUBLICK_PATH/react17.css"></native-route>
+  </native-route>
+  <native-route path="vue">
+    <native-route path="3/basic" lazy url="@PUBLICK_PATH/vue3.js" shadowCSSUrl="@PUBLICK_PATH/vue3.css" custom-render></native-route>
+  </native-route>
 </native-route>
 ```
 
@@ -179,6 +179,20 @@ example:
 <native-route disable-shadow></native-route>
 ```
 
+## Disable render cache
+
+cache is enabled by default.
+
+use `drop` attribute to disable this.
+
+```html
+<native-route
+  // ...
+  drop
+  // ...
+></native-route>
+```
+
 ## Redirect
 
 ```typescript
@@ -199,9 +213,9 @@ redirect('/', '/other/path');
 
 ```html
 <native-router>
-	<native-route xxxx>
-		<naitve-link>link to other route</native-link>
-	</native-route>
+  <native-route xxxx>
+    <naitve-link>link to other route</native-link>
+  </native-route>
 </native-router>
 ```
 
