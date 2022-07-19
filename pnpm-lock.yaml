@@ -2,20 +2,20 @@ lockfileVersion: 5.4
 
 specifiers:
   '@types/debug': ^4.1.7
-  '@types/node': 18.0.6
-  '@vitejs/plugin-react': 2.0.0
-  '@vue/compiler-sfc': 3.2.37
+  '@types/node': ^18.0.6
+  '@vitejs/plugin-react': ^2.0.0
+  '@vue/compiler-sfc': ^3.2.37
   '@web/dev-server': ^0.1.32
   debug: ^4.3.4
-  esbuild: 0.14.49
+  esbuild: ^0.14.49
   esbuild-plugin-svg: ^0.1.0
   esbuild-plugin-vue: ^0.2.4
   fs-extra: ^10.1.0
-  lit: 2.2.7
-  tsc-alias: 1.6.11
-  typescript: 4.7.4
-  vite: 3.0.1
-  zx: 7.0.7
+  lit: ^2.2.7
+  tsc-alias: ^1.7.0
+  typescript: ^4.7.4
+  vite: ^3.0.2
+  zx: ^7.0.7
 
 dependencies:
   debug: registry.npmmirror.com/debug/4.3.4
@@ -24,16 +24,16 @@ dependencies:
 devDependencies:
   '@types/debug': registry.npmmirror.com/@types/debug/4.1.7
   '@types/node': registry.npmmirror.com/@types/node/18.0.6
-  '@vitejs/plugin-react': registry.npmmirror.com/@vitejs/plugin-react/2.0.0_vite@3.0.1
+  '@vitejs/plugin-react': registry.npmmirror.com/@vitejs/plugin-react/2.0.0_vite@3.0.2
   '@vue/compiler-sfc': registry.npmmirror.com/@vue/compiler-sfc/3.2.37
   '@web/dev-server': registry.npmmirror.com/@web/dev-server/0.1.32
   esbuild: registry.npmmirror.com/esbuild/0.14.49
   esbuild-plugin-svg: 0.1.0
   esbuild-plugin-vue: 0.2.4_esbuild@0.14.49
   fs-extra: 10.1.0
-  tsc-alias: registry.npmmirror.com/tsc-alias/1.6.11
+  tsc-alias: registry.npmmirror.com/tsc-alias/1.7.0
   typescript: registry.npmmirror.com/typescript/4.7.4
-  vite: registry.npmmirror.com/vite/3.0.1
+  vite: registry.npmmirror.com/vite/3.0.2
   zx: registry.npmmirror.com/zx/7.0.7
 
 packages:
@@ -366,13 +366,6 @@ packages:
       '@babel/types': registry.npmmirror.com/@babel/types/7.18.8
     dev: true
 
-  registry.npmmirror.com/@babel/helper-validator-identifier/7.16.7:
-    resolution: {integrity: sha512-hsEnFemeiW4D08A5gUAZxLBTXpZ39P+a+DGDsHw1yxqyQ/jzFEnxf5uTEGp+3bzAbNOxU1paTgYS4ECU/IgfDw==, registry: http://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/@babel/helper-validator-identifier/-/helper-validator-identifier-7.16.7.tgz}
-    name: '@babel/helper-validator-identifier'
-    version: 7.16.7
-    engines: {node: '>=6.9.0'}
-    dev: true
-
   registry.npmmirror.com/@babel/helper-validator-identifier/7.18.6:
     resolution: {integrity: sha512-MmetCkz9ej86nJQV+sFCxoGGrUbU3q02kgLciwkrt9QqEB7cP39oKEY0PakknEO0Gu20SskMRi+AYZ3b1TpN9g==, registry: http://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/@babel/helper-validator-identifier/-/helper-validator-identifier-7.18.6.tgz}
     name: '@babel/helper-validator-identifier'
@@ -409,16 +402,6 @@ packages:
       '@babel/helper-validator-identifier': registry.npmmirror.com/@babel/helper-validator-identifier/7.18.6
       chalk: registry.npmmirror.com/chalk/2.4.2
       js-tokens: registry.npmmirror.com/js-tokens/4.0.0
-    dev: true
-
-  registry.npmmirror.com/@babel/parser/7.18.4:
-    resolution: {integrity: sha512-FDge0dFazETFcxGw/EXzOkN8uJp0PC7Qbm+Pe9T+av2zlBpOgunFHkQPPn+eRuClU73JF+98D531UgayY89tow==, registry: http://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/@babel/parser/-/parser-7.18.4.tgz}
-    name: '@babel/parser'
-    version: 7.18.4
-    engines: {node: '>=6.0.0'}
-    hasBin: true
-    dependencies:
-      '@babel/types': registry.npmmirror.com/@babel/types/7.18.4
     dev: true
 
   registry.npmmirror.com/@babel/parser/7.18.8:
@@ -529,16 +512,6 @@ packages:
       globals: registry.npmmirror.com/globals/11.12.0
     transitivePeerDependencies:
       - supports-color
-    dev: true
-
-  registry.npmmirror.com/@babel/types/7.18.4:
-    resolution: {integrity: sha512-ThN1mBcMq5pG/Vm2IcBmPPfyPXbd8S02rS+OBIDENdufvqC7Z/jHPCv9IcP01277aKtDI8g/2XysBN4hA8niiw==, registry: http://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/@babel/types/-/types-7.18.4.tgz}
-    name: '@babel/types'
-    version: 7.18.4
-    engines: {node: '>=6.9.0'}
-    dependencies:
-      '@babel/helper-validator-identifier': registry.npmmirror.com/@babel/helper-validator-identifier/7.16.7
-      to-fast-properties: registry.npmmirror.com/to-fast-properties/2.0.0
     dev: true
 
   registry.npmmirror.com/@babel/types/7.18.8:
@@ -890,7 +863,7 @@ packages:
       '@types/node': registry.npmmirror.com/@types/node/18.0.6
     dev: true
 
-  registry.npmmirror.com/@vitejs/plugin-react/2.0.0_vite@3.0.1:
+  registry.npmmirror.com/@vitejs/plugin-react/2.0.0_vite@3.0.2:
     resolution: {integrity: sha512-zHkRR+X4zqEPNBbKV2FvWSxK7Q6crjMBVIAYroSU8Nbb4M3E5x4qOiLoqJBHtXgr27kfednXjkwr3lr8jS6Wrw==, registry: http://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/@vitejs/plugin-react/-/plugin-react-2.0.0.tgz}
     id: registry.npmmirror.com/@vitejs/plugin-react/2.0.0
     name: '@vitejs/plugin-react'
@@ -906,7 +879,7 @@ packages:
       '@babel/plugin-transform-react-jsx-source': registry.npmmirror.com/@babel/plugin-transform-react-jsx-source/7.18.6_@babel+core@7.18.6
       magic-string: registry.npmmirror.com/magic-string/0.26.2
       react-refresh: registry.npmmirror.com/react-refresh/0.14.0
-      vite: registry.npmmirror.com/vite/3.0.1
+      vite: registry.npmmirror.com/vite/3.0.2
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -916,7 +889,7 @@ packages:
     name: '@vue/compiler-core'
     version: 3.2.37
     dependencies:
-      '@babel/parser': registry.npmmirror.com/@babel/parser/7.18.4
+      '@babel/parser': registry.npmmirror.com/@babel/parser/7.18.8
       '@vue/shared': registry.npmmirror.com/@vue/shared/3.2.37
       estree-walker: registry.npmmirror.com/estree-walker/2.0.2
       source-map: registry.npmmirror.com/source-map/0.6.1
@@ -936,7 +909,7 @@ packages:
     name: '@vue/compiler-sfc'
     version: 3.2.37
     dependencies:
-      '@babel/parser': registry.npmmirror.com/@babel/parser/7.18.4
+      '@babel/parser': registry.npmmirror.com/@babel/parser/7.18.8
       '@vue/compiler-core': registry.npmmirror.com/@vue/compiler-core/3.2.37
       '@vue/compiler-dom': registry.npmmirror.com/@vue/compiler-dom/3.2.37
       '@vue/compiler-ssr': registry.npmmirror.com/@vue/compiler-ssr/3.2.37
@@ -962,7 +935,7 @@ packages:
     name: '@vue/reactivity-transform'
     version: 3.2.37
     dependencies:
-      '@babel/parser': registry.npmmirror.com/@babel/parser/7.18.4
+      '@babel/parser': registry.npmmirror.com/@babel/parser/7.18.8
       '@vue/compiler-core': registry.npmmirror.com/@vue/compiler-core/3.2.37
       '@vue/shared': registry.npmmirror.com/@vue/shared/3.2.37
       estree-walker: registry.npmmirror.com/estree-walker/2.0.2
@@ -2784,10 +2757,10 @@ packages:
       punycode: registry.npmmirror.com/punycode/2.1.1
     dev: true
 
-  registry.npmmirror.com/tsc-alias/1.6.11:
-    resolution: {integrity: sha512-mXEM21WriTJMQyo07B4Kc2nNFFk/1qOjU+jZ0ymXOyLz/A8J+dIBkimqZrh3s/x1qLGoJ1cNZQxa8GGoWOGX1Q==, registry: http://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/tsc-alias/-/tsc-alias-1.6.11.tgz}
+  registry.npmmirror.com/tsc-alias/1.7.0:
+    resolution: {integrity: sha512-n/K6g8S7Ec7Y/A2Z77Ikp2Uv1S1ERtT63ni69XV4W1YPT4rnNmz8ItgIiJYvKfFnKfqcZQ81UPjoKpMTxaC/rg==, registry: http://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/tsc-alias/-/tsc-alias-1.7.0.tgz}
     name: tsc-alias
-    version: 1.6.11
+    version: 1.7.0
     hasBin: true
     dependencies:
       chokidar: registry.npmmirror.com/chokidar/3.5.3
@@ -2851,10 +2824,10 @@ packages:
     engines: {node: '>= 0.8'}
     dev: true
 
-  registry.npmmirror.com/vite/3.0.1:
-    resolution: {integrity: sha512-nefKSglkoEsDpYUkBuT2++L04ktcP8fz8dxLtmZdDdMyhubFSOLFw6BTh/46Fc6tIX/cibs/NVYWNrsqn0k6pQ==, registry: http://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/vite/-/vite-3.0.1.tgz}
+  registry.npmmirror.com/vite/3.0.2:
+    resolution: {integrity: sha512-TAqydxW/w0U5AoL5AsD9DApTvGb2iNbGs3sN4u2VdT1GFkQVUfgUldt+t08TZgi23uIauh1TUOQJALduo9GXqw==, registry: http://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/vite/-/vite-3.0.2.tgz}
     name: vite
-    version: 3.0.1
+    version: 3.0.2
     engines: {node: ^14.18.0 || >=16.0.0}
     hasBin: true
     peerDependencies:

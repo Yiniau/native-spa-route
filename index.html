@@ -59,6 +59,14 @@
 			native-route:defined {
 				display: block;
 			}
+
+      .route-content {
+        border: 1px solid #d5d5d5;
+        border-radius: 3px;
+        box-shadow: 0 0 5px 0px #d5d5d5d9;
+        margin: 15px;
+        min-height: 100px;
+      }
     </style>
 
     <main>
@@ -158,15 +166,8 @@
         <li><a href="/loading">loading status</a></li>
       </ul>
 
-      <div
-        style="
-          border: 1px solid #d5d5d5;
-          border-radius: 3px;
-          box-shadow: 0 0 5px 0px #d5d5d5d9;
-          margin: 15px;
-          min-height: 100px;
-        "
-      >
+      <h3>common demo area</h3>
+      <div class="route-content">
         <native-route path="/common" element="common"></native-route>
 
 				<!-- basic useage -->
@@ -247,6 +248,65 @@
           lockLoadingTime="50000"
         ></native-route>
       </div>
+
+      <h3>route container demo area</h3>
+      <ul>
+        <li><a href="/not-match-any-route-asd123t9q3gjh34g1">unvalid route</a></li>
+        <li><a href="/route-container/not-404">valid route</a></li>
+      </ul>
+      <div class="route-content">
+        <native-route-container root-path="/route-container">
+          <div slot="404" style="width: 100px; height: 50px; display: flex; align-items: center; justify-content: space-around;">
+            <strong>404</strong>
+          </div>
+          <native-route slot="common" path="/">
+            <native-route
+              path="route-container"
+              lazy
+              url="//cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.0.0-beta.74/dist/components/button/button.js"
+              css-url="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.0.0-beta.77/dist/themes/light.css"
+              render-after-ready
+              loadingElement="<span>will show loading as last 96ms</span>"
+              lockLoadingTime="96"
+            >
+              <native-route path="not-match-path_1jj41gn5og159" element="not match route, this content should not appear"></native-route>
+              <native-route path="not-404" element="common content here"></native-route>
+            </native-route>
+          </native-route>
+        </native-route-container>
+      </div>
+      
+      <h3>no shadow dom route container demo area</h3>
+      <ul>
+        <li><a href="/light-dom-not-match-any-route-asd123t9q3gjh34g1">unvalid route</a></li>
+        <li><a href="/light-dom-route-container/not-404">valid route</a></li>
+      </ul>
+      <div class="route-content">
+        <native-route-container disableShadow>
+          <native-route path="/">
+            <native-route
+              path="light-dom-route-container"
+              lazy
+              url="//cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.0.0-beta.74/dist/components/button/button.js"
+              css-url="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.0.0-beta.77/dist/themes/light.css"
+              render-after-ready
+              loadingElement="<span>will show loading as last 96ms</span>"
+              lockLoadingTime="96"
+            >
+              <native-route path="not-match-path_1jj41gn5og159" element="not match route, this content should not appear"></native-route>
+              <native-route path="not-404" element="common content here"></native-route>
+            </native-route>
+          </native-route>
+        </native-route-container>
+      </div>
     </main>
+
+    <script type="module">
+      document.querySelectorAll('native-route-container[disableShadow]').forEach(t => t.set404Content(/* html */`
+        <div slot="404" style="width: 100px; height: 50px; display: flex; align-items: center; justify-content: space-around;">
+          <strong>404</strong>
+        </div>
+      `))
+    </script>
   </body>
 </html>

@@ -147,6 +147,13 @@ export class Route extends LitElement {
   @property({ type: Number })
   protected customCSSBlockRenderTime?: number;
 
+  @state()
+  isExactMatch: boolean = false;
+
+  public checkIsExactMatch() {
+    return this.isExactMatch;
+  }
+
   private isCssExsit() {
     return this.shadowCSSUrl || this.cssUrl;
   }
@@ -339,6 +346,8 @@ export class Route extends LitElement {
   private route_change_callback = () => {
     let _path = this.fullpath;
 
+    this.isExactMatch = window.location.pathname === _path;
+
     if (this.exact) {
       this.active = window.location.pathname === _path;
       return;
@@ -382,6 +391,7 @@ export class Route extends LitElement {
 
     this.log('all source load end, continue logic');
     let render;
+    let destory;
     if (this.moduleReady === 'rejected') {
       if (this.errorRender) {
         render = this.errorRender;
@@ -402,6 +412,7 @@ export class Route extends LitElement {
       } else {
         // do nothing
       }
+      destory = module['destory'] ?? null;
     }
     this.log('render function: ', render);
     if (render) {
@@ -409,13 +420,24 @@ export class Route extends LitElement {
       const customRenderDom = this.cacheCustomRenderDom as HTMLDivElement;
       if (!this.drop) {
         if (!customRenderDom?.children?.length) {
+          this.log('custom render target has no children, call `render`');
           render(customRenderDom);
+          // call destory later
+          if (destory) {
+            destory?.();
+          }
+        } else {
+          this.log('custom render target has children, will not duplicately call render');
         }
       } else {
         customRenderDom.innerHTML = '';
         const inner = document.createElement('div');
         customRenderDom.appendChild(inner);
         render(inner);
+        // call destory later
+        if (destory) {
+          destory?.();
+        }
       }
       return;
     }
@@ -423,9 +445,13 @@ export class Route extends LitElement {
 
   async updated(changedProperties: Map<string | number | symbol, unknown>) {
     if (changedProperties.has('active')) {
+      this.dispatchEvent(new CustomEvent(`route:${this.active ? 'active' : 'un_active'}`, {
+        detail: {},
+        bubbles: true,
+        composed: true,
+      }))
       if (this.active) {
         this.log('attach route active');
-
         if (
           this.lazy &&
           (!this._url_module ||
@@ -453,6 +479,14 @@ export class Route extends LitElement {
 
     if (changedProperties.has('path')) {
       this.fullpath = getFullPath(this.path, this);
+    }
+
+    if (changedProperties.has('isExactMatch')) {
+      this.dispatchEvent(new CustomEvent('route:exact_match_change', {
+        detail: this.isExactMatch,
+        bubbles: true,
+        composed: true,
+      }));
     }
   }
 

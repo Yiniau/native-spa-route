@@ -1,4 +1,5 @@
 import './components/route';
+import './components/route-container';
 
 import {
   hook_a_link,
