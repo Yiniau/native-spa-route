@@ -144,11 +144,14 @@ export class Route extends LitElement {
   @state({ hasChanged: () => false })
   protected cssContent: string = '';
 
+  @property({ type: Number })
+  protected customCSSBlockRenderTime?: number;
+
   private isCssExsit() {
     return this.shadowCSSUrl || this.cssUrl;
   }
 
-  private isActive() {
+  public isActive() {
     return this.active;
   }
 
@@ -184,6 +187,20 @@ export class Route extends LitElement {
     return false;
   }
 
+  private isRenderElement() {
+    if (!this.renderAfterReady) return true;
+    if (this.isCssExsit()) {
+      if (this.cssReady === 'fulfilled') {
+        return true;
+      }
+    } else {
+      if (this.moduleReady === 'fulfilled') {
+        return true;
+      }
+    }
+    return false;
+  }
+
   private renderErrorContent() {
     if (!this.errorRender) return nothing;
 
@@ -206,7 +223,9 @@ export class Route extends LitElement {
 
   private renderLoading() {
     return html`
-      <div part="loading-container" class="loading-container">${unsafeHTML(this.loadingElement)}</div>
+      <div part="loading-container" class="loading-container">
+        ${unsafeHTML(this.loadingElement)}
+      </div>
     `;
   }
 
@@ -227,7 +246,9 @@ export class Route extends LitElement {
           ${this.isRenderLoading()
             ? this.renderLoading()
             : !this.customRender
-            ? this.renderElement()
+            ? this.isRenderElement()
+              ? this.renderElement()
+              : nothing
             : html`<div
                 part="custom-render-container"
                 class="custom-render-container"
@@ -246,6 +267,7 @@ export class Route extends LitElement {
       this._url_module = import(/* @vite-ignore */ url)
         .then((t) => {
           this.log('module load fulfilled');
+          // show loading in a fixed time for better experience
           if (this.lockLoadingTime) {
             const _now = Date.now();
             const _now_d = _now - loadStartTime;
@@ -268,14 +290,42 @@ export class Route extends LitElement {
         });
     }
 
-    if (this.shadowCSSUrl || this.cssUrl) {
+    const isCssExsit = this.isCssExsit();
+    if (isCssExsit) {
       this.cssReady = 'pending';
       try {
-        fetch(this.shadowCSSUrl || this.cssUrl)
+        fetch(isCssExsit)
           .then((t) => t.text())
           .then((css) => {
             this.cssContent = css;
-            this.cssReady = 'fulfilled';
+            if (this.renderAfterReady) {
+              const contentLength = this.cssContent.length;
+              if (contentLength > 9000) {
+                console.warn(
+                  'detect too big css content, may consider put to [head] or use `customCSSBlockRenderTime`, path: [',
+                  this.path,
+                  '] content length: ',
+                  contentLength
+                );
+              }
+              // delay setting status to make sure style content is parsed
+              setTimeout(
+                () => {
+                  this.cssReady = 'fulfilled';
+                },
+                this.customCSSBlockRenderTime
+                  ? this.customCSSBlockRenderTime
+                  : contentLength > 3000
+                  ? 32
+                  : contentLength > 6000
+                  ? 64
+                  : contentLength > 9000
+                  ? 96
+                  : 128 // too big css content maybe should put it to head, or use custom block time
+              );
+            } else {
+              this.cssReady = 'fulfilled';
+            }
           });
       } catch (error) {
         console.error(error);
@@ -380,8 +430,7 @@ export class Route extends LitElement {
           this.lazy &&
           (!this._url_module ||
             this.moduleReady !== 'fulfilled' ||
-            ((this.shadowCSSUrl || this.cssUrl) &&
-              this.cssReady !== 'fulfilled'))
+            (this.isCssExsit() && this.cssReady !== 'fulfilled'))
         ) {
           this.log('in lazy mode, some source not loaded, call loadAssets');
           this.loadAssets();
