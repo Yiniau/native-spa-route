@@ -40,8 +40,8 @@ export class RouteContainer extends LitElement {
   @state()
   contentOf404?: string | (() => string);
 
-	@state()
-	active: boolean = false;
+  @state()
+  active: boolean = false;
 
   // constructor() {
   // 	super();
@@ -65,41 +65,49 @@ export class RouteContainer extends LitElement {
     if (this.active && this.status === '404') {
       if (!this.contentOf404) return nothing;
       let type = typeof this.contentOf404;
-			if (type === 'string') {
-				return html`${unsafeHTML(this.contentOf404 as string)}`;
-			}
-			if (type === 'function') {
-				return html`${unsafeHTML((this.contentOf404 as () => string)() ?? '')}`
-			}
-			return nothing;
+      if (type === 'string') {
+        return html`${unsafeHTML(this.contentOf404 as string)}`;
+      }
+      if (type === 'function') {
+        return html`${unsafeHTML((this.contentOf404 as () => string)() ?? '')}`;
+      }
+      return nothing;
     }
-		return nothing;
+    return nothing;
   }
 
-	private _render_with_shadow_dom() {
-		if (this.active && this.status === '404') {
+  private _render_with_shadow_dom() {
+    if (this.active && this.status === '404') {
       return html`<slot name="404"></slot>`;
     }
     return html`<slot name="common"></slot>`;
-	}
- 
+  }
+
   protected render() {
     if (this.disableShadow) {
       return this._render_with_light_dom();
     } else {
-			return this._render_with_shadow_dom();
-		}
+      return this._render_with_shadow_dom();
+    }
   }
 
-  private _is_match_route() {
-		if (!location.pathname.startsWith(this.rootPath)) return true; // not render 404 will this container is not active
+  private async _is_match_route() {
+    if (!location.pathname.startsWith(this.rootPath)) return true; // not render 404 will this container is not active
     const scopedRoutes = this.querySelectorAll('native-route');
+    await Promise.all(Array.from(scopedRoutes).map((r) => r.updateComplete));
     for (const route of scopedRoutes) {
       if (route.checkIsExactMatch()) {
         return true;
       }
     }
     return false;
+  }
+
+  protected override updated(
+    _changedProperties: PropertyValueMap<any> | Map<PropertyKey, unknown>
+  ): void {
+    // if (_changedProperties.has('active')) {
+    // }
   }
 
   protected override createRenderRoot() {
@@ -109,54 +117,28 @@ export class RouteContainer extends LitElement {
     return this;
   }
 
-  private _listen_route_active_status_change() {
-    let d_timer: ReturnType<typeof setTimeout>;
-    this.addEventListener('route:exact_match_change', () => {
-      if (d_timer) {
-        clearTimeout(d_timer);
+  private _route_change_callback = async () => {
+    this.active = location.pathname.startsWith(this.rootPath);
+    if (this.active) {
+      const isMatch = await this._is_match_route();
+      if (isMatch) {
+        this.status = 'common';
+      } else {
+        this.status = '404';
       }
-      d_timer = setTimeout(() => {
-        if (this._is_match_route()) {
-          this.status = 'common';
-        } else {
-          this.status = '404';
-        }
-      }, 64);
-    });
-  }
-
-  @state({
-    hasChanged() {
-      return false;
-    },
-  })
-  _cache_ret?: string;
-
-  protected override updated(
-    _changedProperties: PropertyValueMap<any> | Map<PropertyKey, unknown>
-  ): void {
-    if (this.disableShadow && this.contentOf404) {
-      // if (_changedProperties.get('status') === '404') {
-      // 	this._render_404();
-      // } else {
-      // 	debugger;
-      // 	this.renderRoot.innerHTML = this._cache_ret ?? '';
-      // }
+    } else {
+      this.status = 'common';
     }
-  }
-
-	private _route_change_callback() {
-		this.active = location.pathname.startsWith(this.rootPath);
-	}
+  };
 
   connectedCallback(): void {
     super.connectedCallback();
-    this._listen_route_active_status_change();
-		this._route_change_callback();
+    // this._listen_route_active_status_change();
+    this._route_change_callback();
     hook_route_change(this._route_change_callback);
   }
 
-	disconnectedCallback() {
+  disconnectedCallback() {
     super.disconnectedCallback();
     unhook_route_change(this._route_change_callback);
   }

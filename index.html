@@ -251,7 +251,8 @@
 
       <h3>route container demo area</h3>
       <ul>
-        <li><a href="/not-match-any-route-asd123t9q3gjh34g1">unvalid route</a></li>
+        <li><a href="/route-container">container</a></li>
+        <li><a href="/route-container/not-match-any-route-asd123t9q3gjh34g1">unvalid route</a></li>
         <li><a href="/route-container/not-404">valid route</a></li>
       </ul>
       <div class="route-content">
@@ -268,6 +269,7 @@
               render-after-ready
               loadingElement="<span>will show loading as last 96ms</span>"
               lockLoadingTime="96"
+              element="hello"
             >
               <native-route path="not-match-path_1jj41gn5og159" element="not match route, this content should not appear"></native-route>
               <native-route path="not-404" element="common content here"></native-route>
@@ -278,11 +280,12 @@
       
       <h3>no shadow dom route container demo area</h3>
       <ul>
-        <li><a href="/light-dom-not-match-any-route-asd123t9q3gjh34g1">unvalid route</a></li>
+        <li><a href="/light-dom-route-container">container</a></li>
+        <li><a href="/light-dom-route-container/light-dom-not-match-any-route-asd123t9q3gjh34g1">unvalid route</a></li>
         <li><a href="/light-dom-route-container/not-404">valid route</a></li>
       </ul>
       <div class="route-content">
-        <native-route-container disableShadow>
+        <native-route-container disableShadow root-path="/light-dom-route-container">
           <native-route path="/">
             <native-route
               path="light-dom-route-container"
@@ -292,10 +295,12 @@
               render-after-ready
               loadingElement="<span>will show loading as last 96ms</span>"
               lockLoadingTime="96"
+              element="container here"
+              exact
             >
-              <native-route path="not-match-path_1jj41gn5og159" element="not match route, this content should not appear"></native-route>
-              <native-route path="not-404" element="common content here"></native-route>
             </native-route>
+            <native-route exact path="light-dom-route-container/not-match-path_1jj41gn5og159" element="not match route, this content should not appear"></native-route>
+            <native-route exact path="light-dom-route-container/not-404" element="<span>common content here</span>"></native-route>
           </native-route>
         </native-route-container>
       </div>
@@ -303,10 +308,11 @@
 
     <script type="module">
       document.querySelectorAll('native-route-container[disableShadow]').forEach(t => t.set404Content(/* html */`
-        <div slot="404" style="width: 100px; height: 50px; display: flex; align-items: center; justify-content: space-around;">
+        <div style="width: 100px; height: 50px; display: flex; align-items: center; justify-content: space-around;">
           <strong>404</strong>
         </div>
       `))
+      history.pushState(history.state, '', location.pathname);
     </script>
   </body>
 </html>
