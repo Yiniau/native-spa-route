@@ -391,7 +391,6 @@ export class Route extends LitElement {
 
     this.log('all source load end, continue logic');
     let render;
-    let destory;
     if (this.moduleReady === 'rejected') {
       if (this.errorRender) {
         render = this.errorRender;
@@ -412,7 +411,6 @@ export class Route extends LitElement {
       } else {
         // do nothing
       }
-      destory = module['destory'] ?? null;
     }
     this.log('render function: ', render);
     if (render) {
@@ -422,10 +420,6 @@ export class Route extends LitElement {
         if (!customRenderDom?.children?.length) {
           this.log('custom render target has no children, call `render`');
           render(customRenderDom);
-          // call destory later
-          if (destory) {
-            destory?.();
-          }
         } else {
           this.log('custom render target has children, will not duplicately call render');
         }
@@ -434,10 +428,6 @@ export class Route extends LitElement {
         const inner = document.createElement('div');
         customRenderDom.appendChild(inner);
         render(inner);
-        // call destory later
-        if (destory) {
-          destory?.();
-        }
       }
       return;
     }
