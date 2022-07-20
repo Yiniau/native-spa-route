@@ -413,9 +413,9 @@ export class Route extends LitElement {
       }
     }
     this.log('render function: ', render);
-    if (render) {
+    if (render && this.cacheCustomRenderDom) {
       await this.updateComplete; // wait dom render end
-      const customRenderDom = this.cacheCustomRenderDom as HTMLDivElement;
+      const customRenderDom = this.cacheCustomRenderDom;
       if (!this.drop) {
         if (!customRenderDom?.children?.length) {
           this.log('custom render target has no children, call `render`');
