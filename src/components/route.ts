@@ -413,9 +413,13 @@ export class Route extends LitElement {
       }
     }
     this.log('render function: ', render);
-    if (render && this.cacheCustomRenderDom) {
+    if (render) {
       await this.updateComplete; // wait dom render end
       const customRenderDom = this.cacheCustomRenderDom;
+      if (!customRenderDom) {
+        console.warn('not found custom render dom');
+        return;
+      }
       if (!this.drop) {
         if (!customRenderDom?.children?.length) {
           this.log('custom render target has no children, call `render`');
@@ -424,10 +428,7 @@ export class Route extends LitElement {
           this.log('custom render target has children, will not duplicately call render');
         }
       } else {
-        customRenderDom.innerHTML = '';
-        const inner = document.createElement('div');
-        customRenderDom.appendChild(inner);
-        render(inner);
+        render(customRenderDom);
       }
       return;
     }
