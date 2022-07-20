@@ -16,3 +16,5 @@ export function preload() {
 }
 
 export * from './lib/hooks';
+export * from './components/route';
+export * from './components/route-container';
