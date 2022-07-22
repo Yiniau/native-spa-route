@@ -7,6 +7,7 @@ import { cache } from 'lit/directives/cache.js';
 import { hook_route_change, unhook_route_change } from '@/lib/hooks';
 
 const dlog = debug('native-spa-route');
+const dcachelog = debug('native-spa-route:cache');
 
 export type RouteConfig = {
   path: string;
@@ -123,6 +124,9 @@ export class Route extends LitElement {
   private log(...args: any[]) {
     return dlog(`[${this.path}]`, ...args);
   }
+  private cachelog(...args: any[]) {
+    return dcachelog(`[${this.path}]`, ...args);
+  }
 
   @state()
   private active: boolean = false;
@@ -147,11 +151,24 @@ export class Route extends LitElement {
   @property({ type: Number })
   protected customCSSBlockRenderTime?: number;
 
+  @property({ type: Number })
+  protected cacheVaildTime: number = 10 * 60 * 1000;
+
   @state()
   isExactMatch: boolean = false;
 
+  @state({ hasChanged: () => false })
+  isModuleDestroyed: boolean = false;
+
+  @state({ hasChanged: () => false })
+  cacheDestroyTimer?: ReturnType<typeof setTimeout>;
+
   public checkIsExactMatch() {
     return this.isExactMatch;
+  }
+
+  public getFullPath() {
+    return this.fullpath;
   }
 
   private isCssExsit() {
@@ -274,6 +291,11 @@ export class Route extends LitElement {
       this._url_module = import(/* @vite-ignore */ url)
         .then((t) => {
           this.log('module load fulfilled');
+          if (!this.drop && !t.destroy) {
+            console.error(
+              `cannot found module [${this._url_module}] \`destroy\` method`
+            );
+          }
           // show loading in a fixed time for better experience
           if (this.lockLoadingTime) {
             const _now = Date.now();
@@ -382,6 +404,42 @@ export class Route extends LitElement {
   @query('div.custom-render-container', false)
   cacheCustomRenderDom?: HTMLDivElement;
 
+  private _could_set_cache_invalid_timer() {
+    return this.customRender && !this.drop && this.moduleReady === 'fulfilled';
+  }
+
+  private _set_cache_invalid_timer() {
+    if (!this._could_set_cache_invalid_timer()) {
+      return this.cachelog('cannot set cache clear timer');
+    }
+
+    if (this.cacheDestroyTimer) {
+      this.cachelog('clear cache timer');
+      clearTimeout(this.cacheDestroyTimer);
+      this.cacheDestroyTimer = undefined;
+    }
+    if (!this.active) {
+      this.cachelog('start set cache clear timer');
+      this._url_module?.then(({ destroy }) => {
+        if (typeof destroy === 'function') {
+          this.cachelog('set clear timer in ', this.cacheVaildTime);
+          this.cacheDestroyTimer = setTimeout(() => {
+            try {
+              console.info('call module destory in module: ', this);
+              destroy();
+              this.isModuleDestroyed = true;
+            } catch (error) {
+              console.warn('module destory failed');
+              console.warn(error);
+            }
+          }, this.cacheVaildTime);
+        } else {
+          this.cachelog('not found destroy function');
+        }
+      });
+    }
+  }
+
   private async _render_url_module() {
     if (this.shadowCSSUrl && this.cssUrl) {
       if (this.cssReady !== 'fulfilled' && this.cssReady !== 'rejected') return;
@@ -421,11 +479,17 @@ export class Route extends LitElement {
         return;
       }
       if (!this.drop) {
-        if (!customRenderDom?.children?.length) {
+        if (this.isModuleDestroyed) {
+          this.log('cache invalid, call `render` function');
+          this.isModuleDestroyed = false;
+          render(customRenderDom);
+        } else if (!customRenderDom?.children?.length) {
           this.log('custom render target has no children, call `render`');
           render(customRenderDom);
         } else {
-          this.log('custom render target has children, will not duplicately call render');
+          this.log(
+            'custom render target has children, will not duplicately call render'
+          );
         }
       } else {
         render(customRenderDom);
@@ -436,12 +500,18 @@ export class Route extends LitElement {
 
   async updated(changedProperties: Map<string | number | symbol, unknown>) {
     if (changedProperties.has('active')) {
-      this.dispatchEvent(new CustomEvent(`route:${this.active ? 'active' : 'un_active'}`, {
-        detail: {},
-        bubbles: true,
-        composed: true,
-      }))
+      this.dispatchEvent(
+        new CustomEvent(`route:${this.active ? 'active' : 'un_active'}`, {
+          detail: {},
+          bubbles: true,
+          composed: true,
+        })
+      );
       if (this.active) {
+        if (this.cacheDestroyTimer) {
+          clearTimeout(this.cacheDestroyTimer);
+          this.cacheDestroyTimer = undefined;
+        }
         this.log('attach route active');
         if (
           this.lazy &&
@@ -454,6 +524,9 @@ export class Route extends LitElement {
         } else {
           this._render_url_module();
         }
+      }
+      if (!this.active) {
+        this._set_cache_invalid_timer();
       }
     }
 
@@ -473,12 +546,20 @@ export class Route extends LitElement {
     }
 
     if (changedProperties.has('isExactMatch')) {
-      this.dispatchEvent(new CustomEvent('route:exact_match_change', {
-        detail: this.isExactMatch,
-        bubbles: true,
-        composed: true,
-      }));
+      this.dispatchEvent(
+        new CustomEvent('route:exact_match_change', {
+          detail: this.isExactMatch,
+          bubbles: true,
+          composed: true,
+        })
+      );
     }
+
+    // if (changedProperties.has('isModuleDestroyed')) {
+    //   if (!changedProperties.get('isModuleDestroyed')) {
+    //     this._render_url_module();
+    //   }
+    // }
   }
 
   connectedCallback() {

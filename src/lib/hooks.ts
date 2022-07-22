@@ -50,9 +50,10 @@ export function hook_history_change(lifecycle?: {
     window.dispatchEvent(
       new CustomEvent('history:pushState', {
         detail: {
+          type: 'pushState',
           data,
           unused,
-          _url,
+          url: _url,
         },
       })
     );
@@ -73,9 +74,10 @@ export function hook_history_change(lifecycle?: {
     window.dispatchEvent(
       new CustomEvent('history:replaceState', {
         detail: {
+          type: 'replaceState',
           data,
           unused,
-          _url,
+          url: _url,
         },
       })
     );
@@ -88,7 +90,9 @@ export function hook_history_change(lifecycle?: {
     originBack.apply(this, []);
     window.dispatchEvent(
       new CustomEvent('history:back', {
-        detail: {},
+        detail: {
+          type: 'back',
+        },
       })
     );
     lifecycle?.after?.('back', null, '', null);
@@ -100,7 +104,9 @@ export function hook_history_change(lifecycle?: {
     originForward.apply(this, []);
     window.dispatchEvent(
       new CustomEvent('history:forward', {
-        detail: {},
+        detail: {
+          type: 'forward',
+        },
       })
     );
     lifecycle?.after?.('forward', null, '', null);
@@ -113,6 +119,7 @@ export function hook_history_change(lifecycle?: {
     window.dispatchEvent(
       new CustomEvent('history:go', {
         detail: {
+          type: 'go',
           delta,
         },
       })
