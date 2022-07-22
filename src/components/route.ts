@@ -509,6 +509,7 @@ export class Route extends LitElement {
       );
       if (this.active) {
         if (this.cacheDestroyTimer) {
+          this.cachelog('current module active, clear timer', this);
           clearTimeout(this.cacheDestroyTimer);
           this.cacheDestroyTimer = undefined;
         }
