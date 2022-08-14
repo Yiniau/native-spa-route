@@ -109,8 +109,27 @@ export class Route extends LitElement {
   /**
    * alias as shadowCSSUrl, more readable
    */
-  @property({ type: String, attribute: 'css-url' })
-  cssUrl: string = '';
+  @property({
+    attribute: 'css-url',
+    converter: {
+      fromAttribute(value) {
+        if (!value) return '';
+        if (/\[.*\]/.test(value)) {
+          return JSON.parse(value);
+        } else {
+          return value;
+        }
+      },
+      toAttribute(value: string | string[]) {
+        if (Array.isArray(value)) {
+          return JSON.stringify(value);
+        } else {
+          return value;
+        }
+      },
+    },
+  })
+  cssUrl: string | string[] = '';
 
   @property({ type: Number })
   cssDelayRender: number = 32;
@@ -120,6 +139,15 @@ export class Route extends LitElement {
 
   @property({ type: Boolean })
   drop: boolean = false;
+
+  @property({ type: Boolean })
+  cssOnly: boolean = false;
+
+  @property({ type: Number })
+  customCSSBlockRenderTime?: number;
+
+  @property({ type: Number })
+  cacheVaildTime: number = 10 * 60 * 1000;
 
   private log(...args: any[]) {
     return dlog(`[${this.path}]`, ...args);
@@ -147,12 +175,6 @@ export class Route extends LitElement {
 
   @state({ hasChanged: () => false })
   protected cssContent: string = '';
-
-  @property({ type: Number })
-  protected customCSSBlockRenderTime?: number;
-
-  @property({ type: Number })
-  protected cacheVaildTime: number = 10 * 60 * 1000;
 
   @state()
   isExactMatch: boolean = false;
@@ -282,7 +304,43 @@ export class Route extends LitElement {
     return this.drop ? content : html`${cache(content)}`;
   }
 
-  private loadAssets() {
+  private setCSSContent(css: string, append: boolean = false) {
+    if (append) {
+      this.cssContent += css;
+    } else {
+      this.cssContent = css;
+    }
+    if (this.renderAfterReady) {
+      const contentLength = this.cssContent.length;
+      if (contentLength > 9000) {
+        console.warn(
+          'detect too big css content, may consider put to [head] or use `customCSSBlockRenderTime`, path: [',
+          this.path,
+          '] content length: ',
+          contentLength
+        );
+      }
+      // delay setting status to make sure style content is parsed
+      setTimeout(
+        () => {
+          this.cssReady = 'fulfilled';
+        },
+        this.customCSSBlockRenderTime
+          ? this.customCSSBlockRenderTime
+          : contentLength > 3000
+          ? 32
+          : contentLength > 6000
+          ? 64
+          : contentLength > 9000
+          ? 96
+          : 128 // too big css content maybe should put it to head, or use custom block time
+      );
+    } else {
+      this.cssReady = 'fulfilled';
+    }
+  }
+
+  private async loadAssets() {
     this.log('start load assets');
     const url = this.url;
     if (typeof url === 'string') {
@@ -319,43 +377,30 @@ export class Route extends LitElement {
         });
     }
 
-    const isCssExsit = this.isCssExsit();
-    if (isCssExsit) {
+    const css_url = this.isCssExsit();
+    if (!this.cssContent && css_url) {
+      if (Array.isArray(css_url)) {
+      }
       this.cssReady = 'pending';
       try {
-        fetch(isCssExsit)
-          .then((t) => t.text())
-          .then((css) => {
-            this.cssContent = css;
-            if (this.renderAfterReady) {
-              const contentLength = this.cssContent.length;
-              if (contentLength > 9000) {
-                console.warn(
-                  'detect too big css content, may consider put to [head] or use `customCSSBlockRenderTime`, path: [',
-                  this.path,
-                  '] content length: ',
-                  contentLength
-                );
-              }
-              // delay setting status to make sure style content is parsed
-              setTimeout(
-                () => {
-                  this.cssReady = 'fulfilled';
-                },
-                this.customCSSBlockRenderTime
-                  ? this.customCSSBlockRenderTime
-                  : contentLength > 3000
-                  ? 32
-                  : contentLength > 6000
-                  ? 64
-                  : contentLength > 9000
-                  ? 96
-                  : 128 // too big css content maybe should put it to head, or use custom block time
-              );
-            } else {
-              this.cssReady = 'fulfilled';
-            }
-          });
+        if (Array.isArray(css_url)) {
+          await Promise.all(
+            css_url.map((l) =>
+              fetch(l)
+                .then((t) => t.text())
+                .then((t) => {
+                  this.setCSSContent(t, true);
+                  return true;
+                })
+            )
+          );
+        } else {
+          await fetch(css_url)
+            .then((t) => t.text())
+            .then((t) => {
+              this.setCSSContent(t);
+            });
+        }
       } catch (error) {
         console.error(error);
         this.cssReady = 'rejected';
@@ -568,6 +613,14 @@ export class Route extends LitElement {
     this.fullpath = getFullPath(this.path, this);
     if (!this.lazy && this.url) {
       this.loadAssets();
+    }
+    // while css only mode, direct set module load fulfilled;
+    if (this.cssOnly) {
+      this.moduleReady = 'fulfilled';
+      this._url_module = Promise.resolve({
+        render() {},
+        destroy() {},
+      });
     }
     this.route_change_callback();
     hook_route_change(this.route_change_callback);
