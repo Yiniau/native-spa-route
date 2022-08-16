@@ -149,6 +149,12 @@ export class Route extends LitElement {
   @property({ type: Number })
   cacheVaildTime: number = 10 * 60 * 1000;
 
+  /**
+   * if enabled virtualNode, native-route-container will ignore this node.
+   */
+  @property({ type: Boolean })
+  virtualNode: boolean = false;
+
   private log(...args: any[]) {
     return dlog(`[${this.path}]`, ...args);
   }

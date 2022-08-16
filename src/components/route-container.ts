@@ -1,8 +1,11 @@
 import { html, LitElement, nothing, PropertyValueMap } from 'lit';
 import { customElement, property, queryAll, state } from 'lit/decorators.js';
 import { unsafeHTML } from 'lit/directives/unsafe-html.js';
+import debug from 'debug';
 import { hook_route_change, unhook_route_change } from '../lib/hooks';
 import { Route } from './route';
+
+const dlog = debug('native-spa-route');
 
 @customElement('native-route-container')
 export class RouteContainer extends LitElement {
@@ -92,11 +95,12 @@ export class RouteContainer extends LitElement {
   }
 
   private async _is_match_route() {
-    if (!location.pathname.startsWith(this.rootPath)) return true; // not render 404 will this container is not active
+    // if (!location.pathname.startsWith(this.rootPath)) return true; // not render 404 will this container is not active
     const scopedRoutes = this.querySelectorAll('native-route');
     await Promise.all(Array.from(scopedRoutes).map((r) => r.updateComplete));
     for (const route of scopedRoutes) {
-      if (route.checkIsExactMatch()) {
+      if (!route.virtualNode && route.isActive()) {
+        dlog('this route is active: ',route);
         return true;
       }
     }
