@@ -200,7 +200,7 @@
           <native-route
             path="button"
             url="//cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.0.0-beta.74/dist/components/button/button.js"
-            css-url="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.0.0-beta.77/dist/themes/light.css"
+            css-url='["https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.0.0-beta.77/dist/themes/light.css"]'
             element='<sl-button>Button</sl-button><sl-button variant="primary">Primary</sl-button><sl-button variant="neutral" loading>Neutral</sl-button>'
             lazy
           >
@@ -208,7 +208,7 @@
           <native-route
             path="ready_button"
             url="//cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.0.0-beta.74/dist/components/button/button.js"
-            css-url="//cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.0.0-beta.74/dist/themes/light.css"
+            css-url='["//cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.0.0-beta.74/dist/themes/light.css"]'
             element='<sl-button>Render After Ready Button</sl-button><sl-button variant="primary">Primary</sl-button><sl-button variant="neutral" loading>Neutral</sl-button>'
             render-after-ready
             lazy
@@ -260,7 +260,7 @@
           <div slot="404" style="width: 100px; height: 50px; display: flex; align-items: center; justify-content: space-around;">
             <strong>404</strong>
           </div>
-          <native-route slot="common" path="/">
+          <native-route slot="common" path="/" virtualNode>
             <native-route
               path="route-container"
               lazy
@@ -286,7 +286,7 @@
       </ul>
       <div class="route-content">
         <native-route-container disableShadow root-path="/light-dom-route-container">
-          <native-route path="/">
+          <native-route path="/" virtualNode>
             <native-route
               path="light-dom-route-container"
               lazy
@@ -307,11 +307,14 @@
     </main>
 
     <script type="module">
-      document.querySelectorAll('native-route-container[disableShadow]').forEach(t => t.set404Content(/* html */`
-        <div style="width: 100px; height: 50px; display: flex; align-items: center; justify-content: space-around;">
-          <strong>404</strong>
-        </div>
-      `))
+      document.querySelectorAll('native-route-container[disableShadow]').forEach(t => {
+        console.log(t);
+        t.set404Content(/* html */`
+          <div style="width: 100px; height: 50px; display: flex; align-items: center; justify-content: space-around;">
+            <strong>404</strong>
+          </div>
+        `);
+      })
       history.pushState(history.state, '', location.pathname);
     </script>
   </body>

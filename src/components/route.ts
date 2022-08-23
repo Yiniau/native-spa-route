@@ -3,8 +3,10 @@ import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { unsafeHTML } from 'lit/directives/unsafe-html.js';
 import { cache } from 'lit/directives/cache.js';
+import { createRef, ref } from 'lit/directives/ref.js';
 
 import { hook_route_change, unhook_route_change } from '@/lib/hooks';
+import { afterCssReady } from '@/lib/cssReady';
 
 const dlog = debug('native-spa-route');
 const dcachelog = debug('native-spa-route:cache');
@@ -155,6 +157,8 @@ export class Route extends LitElement {
   @property({ type: Boolean })
   virtualNode: boolean = false;
 
+  private _style_tag_ref = createRef<HTMLStyleElement>();
+
   private log(...args: any[]) {
     return dlog(`[${this.path}]`, ...args);
   }
@@ -292,7 +296,7 @@ export class Route extends LitElement {
       ? this.renderErrorContent()
       : html`
           ${this.appendDirection === 'before' ? html`<slot></slot>` : ''}
-          <style>
+          <style ${ref(this._style_tag_ref)}>
             ${this.cssContent}
           </style>
           ${this.isRenderLoading()
@@ -316,34 +320,34 @@ export class Route extends LitElement {
     } else {
       this.cssContent = css;
     }
-    if (this.renderAfterReady) {
-      const contentLength = this.cssContent.length;
-      if (contentLength > 9000) {
-        console.warn(
-          'detect too big css content, may consider put to [head] or use `customCSSBlockRenderTime`, path: [',
-          this.path,
-          '] content length: ',
-          contentLength
-        );
-      }
-      // delay setting status to make sure style content is parsed
-      setTimeout(
-        () => {
-          this.cssReady = 'fulfilled';
-        },
-        this.customCSSBlockRenderTime
-          ? this.customCSSBlockRenderTime
-          : contentLength > 3000
-          ? 32
-          : contentLength > 6000
-          ? 64
-          : contentLength > 9000
-          ? 96
-          : 128 // too big css content maybe should put it to head, or use custom block time
-      );
-    } else {
-      this.cssReady = 'fulfilled';
-    }
+    // if (this.renderAfterReady) {
+    //   const contentLength = this.cssContent.length;
+    //   if (contentLength > 9000) {
+    //     console.warn(
+    //       'detect too big css content, may consider put to [head] or use `customCSSBlockRenderTime`, path: [',
+    //       this.path,
+    //       '] content length: ',
+    //       contentLength
+    //     );
+    //   }
+    //   // delay setting status to make sure style content is parsed
+    //   setTimeout(
+    //     () => {
+    //       this.cssReady = 'fulfilled';
+    //     },
+    //     this.customCSSBlockRenderTime
+    //       ? this.customCSSBlockRenderTime
+    //       : contentLength > 3000
+    //       ? 32
+    //       : contentLength > 6000
+    //       ? 64
+    //       : contentLength > 9000
+    //       ? 96
+    //       : 128 // too big css content maybe should put it to head, or use custom block time
+    //   );
+    // } else {
+    //   this.cssReady = 'fulfilled';
+    // }
   }
 
   private async loadAssets() {
@@ -406,6 +410,38 @@ export class Route extends LitElement {
             .then((t) => {
               this.setCSSContent(t);
             });
+        }
+        if (this.renderAfterReady) {
+          let styleTag = this._style_tag_ref.value;
+          if (!styleTag) {
+            let t;
+            if (this.disableShadow) {
+              t = this.querySelector('style');
+            } else {
+              t = this.renderRoot.querySelector('style');
+            }
+            if (t?.tagName === 'STYLE') {
+              styleTag = t;
+            }
+          }
+          if (styleTag) {
+            try {
+              let isReady = await afterCssReady(this, styleTag)
+              if (isReady) {
+                this.cssReady = 'fulfilled';
+              } else {
+                this.cssReady = 'rejected';
+              }
+            } catch (error) {
+              console.error(error);
+              this.cssReady = 'rejected';
+            }
+          } else {
+            console.error('cannot found style tag, make css load rejected');
+            this.cssReady = 'rejected';
+          }
+        } else {
+          this.cssReady = 'fulfilled';
         }
       } catch (error) {
         console.error(error);
