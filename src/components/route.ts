@@ -642,12 +642,6 @@ export class Route extends LitElement {
         })
       );
     }
-
-    // if (changedProperties.has('isModuleDestroyed')) {
-    //   if (!changedProperties.get('isModuleDestroyed')) {
-    //     this._render_url_module();
-    //   }
-    // }
   }
 
   connectedCallback() {
