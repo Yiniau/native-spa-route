@@ -28,9 +28,9 @@ function sleep(time: number): Promise<void> {
 export async function afterCssReady(route: Route, styleTag: HTMLStyleElement): Promise<boolean> {
 	return new Promise(async (res) => {
 		let counter = 0;
-		let max_counter = 30 * 60; // 1 secends 60 time, max wait 30 secends
+		let max_counter = 30 * 60; // 1 secends 60 time, max wait 30 * 150% secends
 		while (route.isActive()) {
-			console.log('round afterCssReady...', counter);
+			// console.log('round afterCssReady...', counter);
 			counter += 1;
 			if (counter > max_counter) {
 				console.warn('css check over max time');
@@ -39,7 +39,7 @@ export async function afterCssReady(route: Route, styleTag: HTMLStyleElement): P
 			if (isCssReady(styleTag, route.disableShadow)) {
 				return res(true);
  			}
-			await sleep(16);		
+			await sleep(15);		
 		}
 		res(false);
 	});
