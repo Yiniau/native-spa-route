@@ -209,7 +209,8 @@ redirect('/', '/other/path');
 ## next step plan
 
 1. [x] ~~implament `<native-redirect from="/" to="/home"></native-redirect>` component~~ implament redirect api
-2. [ ] support scoped route to avoud global history api change.
+2. [x] regexp based dynamic route
+3. [ ] support scoped route to avoud global history api change.
 
 ```html
 <native-router>

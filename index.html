@@ -304,6 +304,24 @@
           </native-route>
         </native-route-container>
       </div>
+      
+      <h3>dynamic route path</h3>
+      <ul>
+        <li><a href="/dynamic-route">dynamic route</a></li>
+        <li><a href="/dynamic-route/matched_1">matched value 1</a></li>
+        <li><a href="/dynamic-route/matched_2">matched value 2</a></li>
+        <li><a href="/dynamic-route/matched_3">matched value 3</a></li>
+        <li><a href="/dynamic-route/matched_4">matched value 4</a></li>
+        <li><a href="/dynamic-route/not-matched">not matched</a></li>
+      </ul>
+      <div class="route-content">
+        <native-route-container disableShadow root-path="/dynamic-route">
+          <native-route path="/dynamic-route" virtualNode>
+            <native-route path=":matched_[0-9]" element="matched"></native-route>
+            <native-route path=":DEFAULT" element="not match"></native-route>
+          </native-route>
+        </native-route-container>
+      </div>
     </main>
 
     <script type="module">

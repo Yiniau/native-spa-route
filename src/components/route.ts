@@ -454,6 +454,9 @@ export class Route extends LitElement {
 
   private route_change_callback = () => {
     let _path = this.fullpath;
+    // if (_path === '/dynamic-route/:matched_([0-9])') {
+    //   debugger;
+    // }
 
     this.isExactMatch = window.location.pathname === _path;
 
@@ -464,7 +467,12 @@ export class Route extends LitElement {
 
     const pathname = window.location.pathname ?? '';
     const local_pg = pathname.split('/').filter((t) => !!t);
-    const route_pg = _path.split('/').filter((t) => !!t);
+    const route_pg = _path.split('/').filter((t) => !!t).map(t => {
+      if (t.startsWith(':')) {
+        return new RegExp(t.replace(/^\:/, ''));
+      }
+      return t;
+    });
 
     if (route_pg.length > local_pg.length) {
       this.active = false;
@@ -476,7 +484,12 @@ export class Route extends LitElement {
       if (i >= local_pg.length) break;
       const l_p = local_pg[i];
       const r_p = route_pg[i];
-      if (l_p !== r_p) {
+      if (r_p instanceof RegExp) {
+        if (!r_p.test(l_p)) {
+          isMatch = false;
+          break;
+        }
+      } else if (l_p !== r_p) {
         isMatch = false;
         break;
       }
