@@ -157,6 +157,9 @@ export class Route extends LitElement {
   @property({ type: Boolean })
   virtualNode: boolean = false;
 
+  @property({ type: Boolean })
+  groupMatchMode: boolean = false;
+
   private _style_tag_ref = createRef<HTMLStyleElement>();
 
   private log(...args: any[]) {
@@ -426,7 +429,7 @@ export class Route extends LitElement {
           }
           if (styleTag) {
             try {
-              let isReady = await afterCssReady(this, styleTag)
+              let isReady = await afterCssReady(this, styleTag);
               if (isReady) {
                 this.cssReady = 'fulfilled';
               } else {
@@ -452,11 +455,12 @@ export class Route extends LitElement {
     return;
   }
 
+  // private _route_match_check_path: string = '';
+  private _route_match_check_grouped_path: (string | RegExp)[] = [];
+
   private route_change_callback = () => {
     let _path = this.fullpath;
-    // if (_path === '/dynamic-route/:matched_([0-9])') {
-    //   debugger;
-    // }
+    let _grouped_path = this._route_match_check_grouped_path;
 
     this.isExactMatch = window.location.pathname === _path;
 
@@ -465,14 +469,9 @@ export class Route extends LitElement {
       return;
     }
 
-    const pathname = window.location.pathname ?? '';
-    const local_pg = pathname.split('/').filter((t) => !!t);
-    const route_pg = _path.split('/').filter((t) => !!t).map(t => {
-      if (t.startsWith(':')) {
-        return new RegExp(t.replace(/^\:/, ''));
-      }
-      return t;
-    });
+    const pathname = window.location.pathname ?? '/';
+    const local_pg = pathname.split('/');
+    const route_pg = _grouped_path;
 
     if (route_pg.length > local_pg.length) {
       this.active = false;
@@ -657,9 +656,38 @@ export class Route extends LitElement {
     }
   }
 
+  private _parse_route_match_check_group() {
+    let _path: string = this.fullpath;
+
+    let _grouped_path: string[];
+
+    if (this.groupMatchMode) {
+      _grouped_path = _path.split(this.path);
+      _grouped_path = [
+        _grouped_path[0],
+        this.path,
+        ..._grouped_path.slice(2), // use this.path as sep will product an additional empty str.
+      ];
+    } else {
+      // _grouped_path = _path.split('/').filter(t => t !== '');
+      _grouped_path = _path.split('/');
+      if (_path === '/') {
+        // remove additional empty str.
+        _grouped_path = [_grouped_path[0], ..._grouped_path.slice(2)];
+      }
+    }
+    return _grouped_path.map((t) =>
+      t.startsWith(':') ? new RegExp(t.replace(/^\:/, '')) : t
+    );
+  }
+
   connectedCallback() {
     super.connectedCallback();
     this.fullpath = getFullPath(this.path, this);
+
+    // parse route group
+    this._route_match_check_grouped_path = this._parse_route_match_check_group();
+
     if (!this.lazy && this.url) {
       this.loadAssets();
     }
