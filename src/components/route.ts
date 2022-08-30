@@ -661,20 +661,25 @@ export class Route extends LitElement {
 
     let _grouped_path: string[];
 
+    const baseSplit = (p: string) => {
+      let gp = p.split('/');
+      if (p === '/') {
+        // remove additional empty str.
+        gp = [gp[0], ...gp.slice(2)];
+      }
+      return gp;
+    }
+
     if (this.groupMatchMode) {
       _grouped_path = _path.split(this.path);
       _grouped_path = [
-        _grouped_path[0],
+        ...baseSplit(_grouped_path[0]),
         this.path,
         ..._grouped_path.slice(2), // use this.path as sep will product an additional empty str.
       ];
     } else {
       // _grouped_path = _path.split('/').filter(t => t !== '');
-      _grouped_path = _path.split('/');
-      if (_path === '/') {
-        // remove additional empty str.
-        _grouped_path = [_grouped_path[0], ..._grouped_path.slice(2)];
-      }
+      _grouped_path = baseSplit(_path);
     }
     return _grouped_path.map((t) =>
       t.startsWith(':') ? new RegExp(t.replace(/^\:/, '')) : t
