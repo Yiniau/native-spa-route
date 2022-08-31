@@ -157,9 +157,11 @@ this could be use to render react/vue/other render lib content.
 
 ## Content Style CSS
 
-this function use `<style>@import url(xxx)</style>` to inject css into Shadow DOM content.
+use `<style><all CSS content></style>` to inject css into Shadow DOM content.
 
-use by `shadowCSSUrl="<css url here>"`
+use by `css-url="<css url here>"`
+
+support multi css `css-url="['url1', 'url2']"`
 
 ```html
 <native-route path="17/with-css" lazy url="@PUBLICK_PATH/react17.js" custom-render="withCss" shadowCSSUrl="@PUBLICK_PATH/react17.css"></native-route>

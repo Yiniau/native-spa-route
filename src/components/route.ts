@@ -455,8 +455,8 @@ export class Route extends LitElement {
     return;
   }
 
-  // private _route_match_check_path: string = '';
-  private _route_match_check_grouped_path: (string | RegExp)[] = [];
+  _route_match_check_path: string = '';
+  _route_match_check_grouped_path: (string | RegExp)[] = [];
 
   private route_change_callback = () => {
     let _path = this.fullpath;
@@ -689,8 +689,9 @@ export class Route extends LitElement {
   connectedCallback() {
     super.connectedCallback();
     this.fullpath = getFullPath(this.path, this);
-
+    
     // parse route group
+    this._route_match_check_path = this.fullpath;
     this._route_match_check_grouped_path = this._parse_route_match_check_group();
 
     if (!this.lazy && this.url) {
