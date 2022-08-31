@@ -69,6 +69,7 @@
     "zx": "^7.0.7"
   },
   "peerDependencies": {
+    "debug": "^4.3.4",
     "lit": "^2.2.7"
   },
   "publishConfig": {
