@@ -677,7 +677,7 @@ export class Route extends LitElement {
       let gp = p.split('/');
       if (p === '/') {
         // remove additional empty str.
-        gp = [gp[0], ...gp.slice(2)];
+        gp = [gp[0], ...gp.slice(1)];
       }
       return gp;
     }
@@ -687,10 +687,11 @@ export class Route extends LitElement {
       if (_path.endsWith(this.path)) {
         _grouped_path = _grouped_path.slice(0, -1); // remove lastest empty str
       }
+      _grouped_path = _grouped_path.map(t => t.replace(/$\//, '')); // remove lastest `/`
       _grouped_path = [
-        ...baseSplit(_grouped_path[0].replace(/\/$/, '')), // remove lastest `/`
+        ...baseSplit(_grouped_path[0]),
         this.path,
-        ..._grouped_path.slice(2), // use this.path as sep will product an additional empty str.
+        ..._grouped_path.slice(1),
       ];
     } else {
       // _grouped_path = _path.split('/').filter(t => t !== '');
