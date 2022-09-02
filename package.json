@@ -1,6 +1,6 @@
 {
   "name": "native-spa-route",
-  "version": "0.2.6-alpha.2",
+  "version": "0.2.6",
   "author": "Yiniau",
   "license": "MIT",
   "email": "yiranzhouyida@gmail.com",
@@ -29,10 +29,7 @@
   "module": "./dist/main.es.js",
   "exports": {
     ".": {
-      "import": {
-        "types": "./es/main.d.ts",
-        "default": "./dist/main.es.js"
-      }
+      "import": "./dist/main.es.js"
     }
   },
   "types": "./es/main.d.ts",
@@ -48,7 +45,8 @@
     "build": "tsc && tsc-alias && vite build",
     "dev:demo": "zx ./scripts/serve-demo.mjs",
     "make:demo": "zx ./scripts/make-demo.mjs",
-    "test": "vite build --config vite.config.test.ts && web-test-runner --group --coverage"
+    "test": "vite build --config vite.config.test.ts && web-test-runner --coverage",
+    "show-coverage": "npx web-dev-server --port 9898 --root-dir coverage/lcov-report coverage/lcov-report/index.html --open"
   },
   "dependencies": {
     "debug": "^4.3.4",
@@ -56,6 +54,7 @@
   },
   "devDependencies": {
     "@open-wc/testing": "^3.1.6",
+    "@types/chai": "^4.3.3",
     "@types/debug": "^4.1.7",
     "@types/mocha": "^9.1.1",
     "@types/node": "^18.0.6",

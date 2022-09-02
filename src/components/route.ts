@@ -5,8 +5,8 @@ import { unsafeHTML } from 'lit/directives/unsafe-html.js';
 import { cache } from 'lit/directives/cache.js';
 import { createRef, ref } from 'lit/directives/ref.js';
 
-import { hook_route_change, unhook_route_change } from '@/lib/hooks';
-import { afterCssReady } from '@/lib/cssReady';
+import { hook_route_change, unhook_route_change } from '../lib/hooks';
+import { afterCssReady } from '../lib/cssReady';
 
 const dlog = debug('native-spa-route');
 const dcachelog = debug('native-spa-route:cache');

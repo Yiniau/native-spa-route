@@ -18,12 +18,6 @@ export default defineConfig({
         /^lit/,
         'debug'
       ],
-      output: {
-        // 在 UMD 构建模式下为这些外部化的依赖提供一个全局变量
-        globals: {
-          // vue: 'Vue'
-        }
-      }
     }
   },
   plugins: [{
@@ -32,10 +26,4 @@ export default defineConfig({
       return html.replace(/\@PUBLICK_PATH/g, 'http://localhost:3001/dist')
     }
   }],
-  resolve: {
-    alias: {
-      '~': path.resolve(__dirname, './'),
-      '@': path.resolve(__dirname, 'src')
-    }
-  },
 })

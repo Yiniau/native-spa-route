@@ -17,12 +17,7 @@
     "experimentalDecorators": true,
     "forceConsistentCasingInFileNames": true,
     "useDefineForClassFields": false,
-    "skipLibCheck": true,
-    "baseUrl": ".",
-    "paths": {
-      "~/*": ["*"],
-      "@/*": ["src/*"],
-    }
+    "skipLibCheck": true
   },
   "include": [
     "src/**/*.ts",
