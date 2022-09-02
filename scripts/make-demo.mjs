@@ -7,7 +7,7 @@ import esbuildPluginVue from 'esbuild-plugin-vue';
 
 const cwd = process.cwd();
 const srcPath = path.resolve(cwd, 'src');
-const testPath = path.resolve(cwd, 'test');
+const testPath = path.resolve(cwd, 'demo-src');
 // const distPath = path.resolve(cwd, 'dist');
 const demoPath = path.resolve(cwd, 'demo');
 const indexHtmlPath = path.resolve(cwd, 'index.html');
