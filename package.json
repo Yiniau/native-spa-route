@@ -1,6 +1,6 @@
 {
   "name": "native-spa-route",
-  "version": "0.2.6",
+  "version": "0.2.7",
   "author": "Yiniau",
   "license": "MIT",
   "email": "yiranzhouyida@gmail.com",
@@ -25,15 +25,14 @@
     "LICENSE",
     "README.md"
   ],
-  "type": "module",
-  "module": "./dist/main.es.js",
   "exports": {
     ".": {
       "import": "./dist/main.es.js"
     }
   },
-  "types": "./es/main.d.ts",
+  "types": "./es/src/main.d.ts",
   "main": "./dist/main.es.js",
+  "module": "./dist/main.es.js",
   "unpkg": "./dist/main.es.js",
   "jspm": {
     "main": "./dist/main.es.js",
