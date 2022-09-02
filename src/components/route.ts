@@ -507,6 +507,28 @@ export class Route extends LitElement {
     return this.customRender && !this.drop && this.moduleReady === 'fulfilled';
   }
 
+  private _call_module_destroy() {
+    if (this.moduleReady === 'fulfilled') {
+      this._url_module?.then(({ destroy }) => {
+        if (typeof destroy === 'function') {
+          this.cachelog('set clear timer in ', this.cacheVaildTime);
+          try {
+            console.info('call module destory in module: ', this);
+            destroy();
+            this.isModuleDestroyed = true;
+          } catch (error) {
+            console.warn('module destory failed');
+            console.warn(error);
+          }
+        } else {
+          this.cachelog('not found destroy function');
+        }
+      });
+    } else {
+      console.warn('module not fullfilled, cannot call route component destroy');
+    }
+  }
+
   private _set_cache_invalid_timer() {
     if (!this._could_set_cache_invalid_timer()) {
       return this.cachelog('cannot set cache clear timer');
@@ -519,23 +541,9 @@ export class Route extends LitElement {
     }
     if (!this.active) {
       this.cachelog('start set cache clear timer');
-      this._url_module?.then(({ destroy }) => {
-        if (typeof destroy === 'function') {
-          this.cachelog('set clear timer in ', this.cacheVaildTime);
-          this.cacheDestroyTimer = setTimeout(() => {
-            try {
-              console.info('call module destory in module: ', this);
-              destroy();
-              this.isModuleDestroyed = true;
-            } catch (error) {
-              console.warn('module destory failed');
-              console.warn(error);
-            }
-          }, this.cacheVaildTime);
-        } else {
-          this.cachelog('not found destroy function');
-        }
-      });
+      this.cacheDestroyTimer = setTimeout(() => {
+        this._call_module_destroy();
+      }, this.cacheVaildTime);
     }
   }
 
@@ -626,7 +634,11 @@ export class Route extends LitElement {
         }
       }
       if (!this.active) {
-        this._set_cache_invalid_timer();
+        if (this.drop) {
+          this._call_module_destroy();
+        } else {
+          this._set_cache_invalid_timer();
+        }
       }
     }
 
