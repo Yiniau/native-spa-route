@@ -687,7 +687,7 @@ export class Route extends LitElement {
       if (_path.endsWith(this.path)) {
         _grouped_path = _grouped_path.slice(0, -1); // remove lastest empty str
       }
-      _grouped_path = _grouped_path.map(t => t.replace(/$\//, '')); // remove lastest `/`
+      _grouped_path = _grouped_path.map(t => t.replace(/\/$/, '')); // remove lastest `/`
       _grouped_path = [
         ...baseSplit(_grouped_path[0]),
         this.path,
