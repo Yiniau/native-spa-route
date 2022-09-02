@@ -8,6 +8,8 @@ import {
 
 let initted = false;
 
+export function version() { return '0.2.8'; }
+
 export function preload() {
   if (initted) return;
   initted = true;
