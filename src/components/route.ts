@@ -359,7 +359,7 @@ export class Route extends LitElement {
     if (typeof url === 'string') {
       this.moduleReady = 'pending';
       const loadStartTime = Date.now();
-      this._url_module = import(/* @vite-ignore */ url)
+      this._url_module = import(/* @vite-ignore */ /* webpackIgnore: true */ url)
         .then((t) => {
           this.log('module load fulfilled');
           if (!this.drop && !t.destroy) {
