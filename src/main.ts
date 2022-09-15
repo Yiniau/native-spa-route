@@ -8,7 +8,7 @@ import {
 
 let initted = false;
 
-export const version = '0.2.8';
+export const version = '0.2.11';
 
 export function preload() {
   if (initted) return;
