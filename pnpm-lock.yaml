@@ -14,7 +14,6 @@ specifiers:
   '@web/test-runner-playwright': ^0.8.10
   debug: ^4.3.4
   esbuild: ^0.14.49
-  esbuild-plugin-alias: ^0.2.1
   esbuild-plugin-svg: ^0.1.0
   esbuild-plugin-vue: ^0.2.4
   fs-extra: ^10.1.0
@@ -42,7 +41,6 @@ devDependencies:
   '@web/test-runner': registry.npmmirror.com/@web/test-runner/0.14.0
   '@web/test-runner-playwright': registry.npmmirror.com/@web/test-runner-playwright/0.8.10
   esbuild: registry.npmmirror.com/esbuild/0.14.49
-  esbuild-plugin-alias: registry.npmmirror.com/esbuild-plugin-alias/0.2.1
   esbuild-plugin-svg: 0.1.0
   esbuild-plugin-vue: 0.2.4_esbuild@0.14.49
   fs-extra: 10.1.0
@@ -2298,12 +2296,6 @@ packages:
     requiresBuild: true
     dev: true
     optional: true
-
-  registry.npmmirror.com/esbuild-plugin-alias/0.2.1:
-    resolution: {integrity: sha512-jyfL/pwPqaFXyKnj8lP8iLk6Z0m099uXR45aSN8Av1XD4vhvQutxxPzgA2bTcAwQpa1zCXDcWOlhFgyP3GKqhQ==, registry: http://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/esbuild-plugin-alias/-/esbuild-plugin-alias-0.2.1.tgz}
-    name: esbuild-plugin-alias
-    version: 0.2.1
-    dev: true
 
   registry.npmmirror.com/esbuild-sunos-64/0.14.49:
     resolution: {integrity: sha512-4c8Zowp+V3zIWje329BeLbGh6XI9c/rqARNaj5yPHdC61pHI9UNdDxT3rePPJeWcEZVKjkiAS6AP6kiITp7FSw==, registry: http://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/esbuild-sunos-64/-/esbuild-sunos-64-0.14.49.tgz}

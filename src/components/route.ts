@@ -249,15 +249,14 @@ export class Route extends LitElement {
   private isRenderElement() {
     if (!this.renderAfterReady) return true;
     if (this.isCssExsit()) {
-      if (this.cssReady === 'fulfilled') {
-        return true;
+      if (this.cssReady !== 'fulfilled') {
+        return false;
       }
-    } else {
-      if (this.moduleReady === 'fulfilled') {
-        return true;
-      }
+    } 
+    if (this.moduleReady !== 'fulfilled') {
+      return false;
     }
-    return false;
+    return true;
   }
 
   private renderErrorContent() {
@@ -513,7 +512,7 @@ export class Route extends LitElement {
         if (typeof destroy === 'function') {
           this.cachelog('set clear timer in ', this.cacheVaildTime);
           try {
-            console.info('call module destory in module: ', this);
+            this.cachelog('call module destory in module: ', this);
             destroy();
             this.isModuleDestroyed = true;
           } catch (error) {
