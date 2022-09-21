@@ -11,7 +11,7 @@ export function isCssReady(styleTag: HTMLStyleElement, globalCheck = false): boo
 	} else {
 		targetStyleSheet = styleTag.sheet;
 	}
-	if (!targetStyleSheet || !targetStyleSheet.cssRules.length) {
+	if (!targetStyleSheet?.cssRules?.length) {
 		return false;
 	}
 	return true;
@@ -28,7 +28,7 @@ function sleep(time: number): Promise<void> {
 export async function afterCssReady(route: Route, styleTag: HTMLStyleElement): Promise<boolean> {
 	return new Promise(async (res) => {
 		let counter = 0;
-		let max_counter = 30 * 60; // 1 secends 60 time, max wait 30 * 150% secends
+		let max_counter = 60 * 60; // 1 secends 60 time, max wait 30 * 150% secends
 		while (route.isActive()) {
 			// console.log('round afterCssReady...', counter);
 			counter += 1;

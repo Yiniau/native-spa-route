@@ -355,7 +355,7 @@ export class Route extends LitElement {
   private async loadAssets() {
     this.log('start load assets');
     const url = this.url;
-    if (typeof url === 'string') {
+    if (typeof url === 'string' && this.moduleReady !== 'fulfilled') {
       this.moduleReady = 'pending';
       const loadStartTime = Date.now();
       this._url_module = import(/* @vite-ignore */ /* webpackIgnore: true */ url)
@@ -390,9 +390,7 @@ export class Route extends LitElement {
     }
 
     const css_url = this.isCssExsit();
-    if (!this.cssContent && css_url) {
-      if (Array.isArray(css_url)) {
-      }
+    if (!this.cssContent && css_url && this.cssReady !== 'fulfilled') {
       this.cssReady = 'pending';
       try {
         if (Array.isArray(css_url)) {
