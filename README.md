@@ -4,7 +4,7 @@
 
 provide SPA route's experience with native web component
 
-![Online Demo]([https://](https://native-spa-route.vercel.app/))
+[Online Demo](https://native-spa-route.vercel.app/)
 
 ## Installation
 
@@ -212,7 +212,7 @@ redirect('/', '/other/path');
 
 1. [x] ~~implament `<native-redirect from="/" to="/home"></native-redirect>` component~~ implament redirect api
 2. [x] regexp based dynamic route
-3. [ ] support scoped route to avoud global history api change.
+3. [ ] support scoped route to avoid global history api change.
 
 ```html
 <native-router>
