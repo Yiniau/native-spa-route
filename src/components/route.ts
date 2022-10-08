@@ -1,9 +1,10 @@
 import debug from 'debug';
-import { css, html, LitElement, nothing } from 'lit';
+import { css, html, LitElement, nothing, PropertyValueMap } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { unsafeHTML } from 'lit/directives/unsafe-html.js';
 import { cache } from 'lit/directives/cache.js';
 import { createRef, ref } from 'lit/directives/ref.js';
+import { ifDefined } from 'lit/directives/if-defined.js';
 
 import { hook_route_change, unhook_route_change } from '../lib/hooks';
 import { afterCssReady } from '../lib/cssReady';
@@ -133,6 +134,9 @@ export class Route extends LitElement {
   })
   cssUrl: string | string[] = '';
 
+  @property({ type: String })
+  cssParseMode: 'inline' | 'base64' = 'inline';
+
   @property({ type: Number })
   cssDelayRender: number = 32;
 
@@ -186,14 +190,17 @@ export class Route extends LitElement {
   protected cssReady: 'nothing' | 'pending' | 'fulfilled' | 'rejected' =
     'nothing';
 
-  @state({ hasChanged: () => false })
+  @state()
   protected cssContent: string = '';
+
+  @state({ hasChanged: () => false })
+  protected _css_base64?: string;
 
   @state()
   isExactMatch: boolean = false;
 
   @state({ hasChanged: () => false })
-  isModuleDestroyed: boolean = false;
+  isModuleRenderInstanceDestroied: boolean = false;
 
   @state({ hasChanged: () => false })
   cacheDestroyTimer?: ReturnType<typeof setTimeout>;
@@ -206,8 +213,13 @@ export class Route extends LitElement {
     return this.fullpath;
   }
 
-  private isCssExsit() {
-    return this.shadowCSSUrl || this.cssUrl;
+  private isCssExsit(): boolean {
+    const cssUrl = this.shadowCSSUrl || this.cssUrl;
+    if (Array.isArray(cssUrl)) {
+      return cssUrl.length > 0;
+    } else {
+      return cssUrl !== '';
+    }
   }
 
   public isActive() {
@@ -252,7 +264,7 @@ export class Route extends LitElement {
       if (this.cssReady !== 'fulfilled') {
         return false;
       }
-    } 
+    }
     if (this.moduleReady !== 'fulfilled') {
       return false;
     }
@@ -292,14 +304,15 @@ export class Route extends LitElement {
   }
 
   protected render() {
-    const content = !this.isActive()
+    console.groupCollapsed('render');
+    const content = !this.active
       ? nothing
       : this.isRenderError()
       ? this.renderErrorContent()
       : html`
-          ${this.appendDirection === 'before' ? html`<slot></slot>` : ''}
-          <style ${ref(this._style_tag_ref)}>
-            ${this.cssContent}
+          ${this.appendDirection === 'before' ? html`<slot></slot>` : nothing}
+          <style ${ref(this._style_tag_ref)} src=${ifDefined(this._css_base64)}>
+            ${this.cssParseMode === 'base64' ? '' : this.cssContent}
           </style>
           ${this.isRenderLoading()
             ? this.renderLoading()
@@ -311,8 +324,10 @@ export class Route extends LitElement {
                 part="custom-render-container"
                 class="custom-render-container"
               ></div>`}
-          ${this.appendDirection !== 'before' ? html`<slot></slot>` : ''}
+          ${this.appendDirection !== 'before' ? html`<slot></slot>` : nothing}
         `;
+    console.log('this.cssContent: ', this.cssContent);
+    console.groupEnd();
     return this.drop ? content : html`${cache(content)}`;
   }
 
@@ -322,43 +337,81 @@ export class Route extends LitElement {
     } else {
       this.cssContent = css;
     }
-    // if (this.renderAfterReady) {
-    //   const contentLength = this.cssContent.length;
-    //   if (contentLength > 9000) {
-    //     console.warn(
-    //       'detect too big css content, may consider put to [head] or use `customCSSBlockRenderTime`, path: [',
-    //       this.path,
-    //       '] content length: ',
-    //       contentLength
-    //     );
-    //   }
-    //   // delay setting status to make sure style content is parsed
-    //   setTimeout(
-    //     () => {
-    //       this.cssReady = 'fulfilled';
-    //     },
-    //     this.customCSSBlockRenderTime
-    //       ? this.customCSSBlockRenderTime
-    //       : contentLength > 3000
-    //       ? 32
-    //       : contentLength > 6000
-    //       ? 64
-    //       : contentLength > 9000
-    //       ? 96
-    //       : 128 // too big css content maybe should put it to head, or use custom block time
-    //   );
-    // } else {
-    //   this.cssReady = 'fulfilled';
-    // }
   }
 
-  private async loadAssets() {
-    this.log('start load assets');
+  private async _load_CSS() {
+    if (!this.isCssExsit() || this.cssReady === 'fulfilled') {
+      return;
+    }
+
+    if (this.cssContent) {
+      this.cssReady = 'pending';
+      this.setCSSContent(this.cssContent, false);
+    } else {
+      const css_url = this.shadowCSSUrl || this.cssUrl;
+      if (css_url ) {
+        this.cssReady = 'pending';
+        try {
+          // fetch css content
+          if (Array.isArray(css_url)) {
+            const css_content = await Promise.all(
+              css_url.map((l) => fetch(l).then((t) => t.text()))
+            );
+            this.setCSSContent(css_content.join(''), false);
+          } else {
+            const css_content = await fetch(css_url).then((t) => t.text());
+            this.setCSSContent(css_content, false);
+          }
+        } catch (error) {
+          console.error(error);
+          this.cssReady = 'rejected';
+          return;
+        }
+      }
+    }
+
+    await this.updateComplete;
+
+    // block custom render until style parse end
+    if (this.renderAfterReady) {
+      let styleTag = this._style_tag_ref.value;
+      if (!styleTag) {
+        // try find style dom
+        let t;
+        if (this.disableShadow) {
+          t = this.querySelector('style');
+        } else {
+          t = this.renderRoot.querySelector('style');
+        }
+        if (t?.tagName === 'STYLE') {
+          styleTag = t;
+        }
+      }
+      if (!styleTag) {
+        console.error('cannot found style tag, make css load rejected');
+        this.cssReady = 'rejected';
+        return;
+      }
+
+      let isReady = await afterCssReady(this, styleTag);
+      if (isReady) {
+        this.cssReady = 'fulfilled';
+      } else {
+        this.cssReady = 'rejected';
+      }
+    } else {
+      this.cssReady = 'fulfilled';
+    }
+  }
+
+  private async _load_URL_module() {
     const url = this.url;
     if (typeof url === 'string' && this.moduleReady !== 'fulfilled') {
       this.moduleReady = 'pending';
       const loadStartTime = Date.now();
-      this._url_module = import(/* @vite-ignore */ /* webpackIgnore: true */ url)
+      this._url_module = import(
+        /* @vite-ignore */ /* webpackIgnore: true */ url
+      )
         .then((t) => {
           this.log('module load fulfilled');
           if (!this.drop && !t.destroy) {
@@ -388,68 +441,12 @@ export class Route extends LitElement {
           this.moduleReady = 'rejected';
         });
     }
+  }
 
-    const css_url = this.isCssExsit();
-    if (!this.cssContent && css_url && this.cssReady !== 'fulfilled') {
-      this.cssReady = 'pending';
-      try {
-        if (Array.isArray(css_url)) {
-          await Promise.all(
-            css_url.map((l) =>
-              fetch(l)
-                .then((t) => t.text())
-                .then((t) => {
-                  this.setCSSContent(t, true);
-                  return true;
-                })
-            )
-          );
-        } else {
-          await fetch(css_url)
-            .then((t) => t.text())
-            .then((t) => {
-              this.setCSSContent(t);
-            });
-        }
-        if (this.renderAfterReady) {
-          let styleTag = this._style_tag_ref.value;
-          if (!styleTag) {
-            let t;
-            if (this.disableShadow) {
-              t = this.querySelector('style');
-            } else {
-              t = this.renderRoot.querySelector('style');
-            }
-            if (t?.tagName === 'STYLE') {
-              styleTag = t;
-            }
-          }
-          if (styleTag) {
-            try {
-              let isReady = await afterCssReady(this, styleTag);
-              if (isReady) {
-                this.cssReady = 'fulfilled';
-              } else {
-                this.cssReady = 'rejected';
-              }
-            } catch (error) {
-              console.error(error);
-              this.cssReady = 'rejected';
-            }
-          } else {
-            console.error('cannot found style tag, make css load rejected');
-            this.cssReady = 'rejected';
-          }
-        } else {
-          this.cssReady = 'fulfilled';
-        }
-      } catch (error) {
-        console.error(error);
-        this.cssReady = 'rejected';
-      }
-    }
-
-    return;
+  private async loadAssets() {
+    this.log('start load assets');
+    this._load_CSS();
+    this._load_URL_module();
   }
 
   _route_match_check_path: string = '';
@@ -512,7 +509,7 @@ export class Route extends LitElement {
           try {
             this.cachelog('call module destory in module: ', this);
             destroy();
-            this.isModuleDestroyed = true;
+            this.isModuleRenderInstanceDestroied = true;
           } catch (error) {
             console.warn('module destory failed');
             console.warn(error);
@@ -522,7 +519,9 @@ export class Route extends LitElement {
         }
       });
     } else {
-      console.warn('module not fullfilled, cannot call route component destroy');
+      console.warn(
+        'module not fullfilled, cannot call route component destroy'
+      );
     }
   }
 
@@ -546,10 +545,13 @@ export class Route extends LitElement {
 
   private async _render_url_module() {
     if (this.shadowCSSUrl && this.cssUrl) {
-      if (this.cssReady !== 'fulfilled' && this.cssReady !== 'rejected') return;
+      if (this.cssReady !== 'fulfilled' && this.cssReady !== 'rejected') {
+        return;
+      }
     }
-    if (this.moduleReady !== 'fulfilled' && this.moduleReady !== 'rejected')
+    if (this.moduleReady !== 'fulfilled' && this.moduleReady !== 'rejected') {
       return;
+    }
 
     this.log('all source load end, continue logic');
     let render;
@@ -577,15 +579,20 @@ export class Route extends LitElement {
     this.log('render function: ', render);
     if (render) {
       await this.updateComplete; // wait dom render end
-      const customRenderDom = this.cacheCustomRenderDom;
+
+      let customRenderDom = this.disableShadow
+        ? (this.querySelector('div.custom-render-container') as HTMLDivElement)
+        : this.cacheCustomRenderDom;
+
       if (!customRenderDom) {
         console.warn('not found custom render dom');
         return;
       }
+
       if (!this.drop) {
-        if (this.isModuleDestroyed) {
+        if (this.isModuleRenderInstanceDestroied) {
           this.log('cache invalid, call `render` function');
-          this.isModuleDestroyed = false;
+          this.isModuleRenderInstanceDestroied = false;
           render(customRenderDom);
         } else if (!customRenderDom?.children?.length) {
           this.log('custom render target has no children, call `render`');
@@ -599,6 +606,16 @@ export class Route extends LitElement {
         render(customRenderDom);
       }
       return;
+    }
+  }
+
+  protected willUpdate(
+    _changedProperties: PropertyValueMap<any> | Map<PropertyKey, unknown>
+  ): void {
+    if (this.cssParseMode === 'base64') {
+      if (_changedProperties.has('cssContent')) {
+        this._css_base64 = Buffer.from(this.cssContent, 'base64url').toString();
+      }
     }
   }
 
@@ -677,14 +694,14 @@ export class Route extends LitElement {
         gp = [gp[0], ...gp.slice(1)];
       }
       return gp;
-    }
+    };
 
     if (this.groupMatchMode) {
       _grouped_path = _path.split(this.path);
       if (_path.endsWith(this.path)) {
         _grouped_path = _grouped_path.slice(0, -1); // remove lastest empty str
       }
-      _grouped_path = _grouped_path.map(t => t.replace(/\/$/, '')); // remove lastest `/`
+      _grouped_path = _grouped_path.map((t) => t.replace(/\/$/, '')); // remove lastest `/`
       _grouped_path = [
         ...baseSplit(_grouped_path[0]),
         this.path,
@@ -702,10 +719,11 @@ export class Route extends LitElement {
   connectedCallback() {
     super.connectedCallback();
     this.fullpath = getFullPath(this.path, this);
-    
+
     // parse route group
     this._route_match_check_path = this.fullpath;
-    this._route_match_check_grouped_path = this._parse_route_match_check_group();
+    this._route_match_check_grouped_path =
+      this._parse_route_match_check_group();
 
     if (!this.lazy && this.url) {
       this.loadAssets();
