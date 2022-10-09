@@ -304,7 +304,7 @@ export class Route extends LitElement {
   }
 
   protected render() {
-    console.groupCollapsed('render');
+    // console.groupCollapsed('render');
     const content = !this.active
       ? nothing
       : this.isRenderError()
@@ -326,8 +326,8 @@ export class Route extends LitElement {
               ></div>`}
           ${this.appendDirection !== 'before' ? html`<slot></slot>` : nothing}
         `;
-    console.log('this.cssContent: ', this.cssContent);
-    console.groupEnd();
+    // console.log('this.cssContent: ', this.cssContent);
+    // console.groupEnd();
     return this.drop ? content : html`${cache(content)}`;
   }
 

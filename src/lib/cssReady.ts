@@ -35,7 +35,7 @@ export async function afterCssReady(route: Route, styleTag: HTMLStyleElement): P
 		let w = 50;
 		let m_c = 5 * 60 * 1000 / w;
 		while (route.isActive()) {
-			console.log('into css check')
+			// console.log('into css check')
 			if (c > m_c) {
 				console.warn('css check over max time');
 				return res(false);
