@@ -12,4 +12,14 @@ describe('route', () => {
     const correct_ret = ['', 'root', /(?:hello)|(?:world)/];
     expect(el._route_match_check_grouped_path).deep.equal(correct_ret);
   });
+  it('nest route test', async () => {
+    let el: Route = await fixture(html`
+      <native-route path="/root">
+        <native-route path=":(?:hello/world)" groupMatchMode></native-route>
+      </native-route>
+    `);
+    el = el.children[0] as Route;
+    const correct_ret = ['', 'root', /(?:hello\/world)/];
+    expect(el._route_match_check_grouped_path).deep.equal(correct_ret);
+  });
 });

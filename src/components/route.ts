@@ -25,6 +25,9 @@ function getFullPath(url: string, node: HTMLElement): string {
       const parentPath = node.parentElement.getAttribute('path') ?? '';
       const _url = `${isR ? '' : '/'}${url}`;
       if (parentPath === '' || parentPath === '/') {
+        if (_url !== '/') {
+          return _url.replace(/\/$/, '');
+        }
         return _url;
       } else {
         return getFullPath(`${parentPath}${_url}`, node.parentElement);
