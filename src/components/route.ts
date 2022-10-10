@@ -23,11 +23,8 @@ function getFullPath(url: string, node: HTMLElement): string {
   if (node.parentElement && node.parentElement.tagName !== 'BODY') {
     if (node.parentElement.tagName === 'NATIVE-ROUTE') {
       const parentPath = node.parentElement.getAttribute('path') ?? '';
-      const _url = `${isR ? '' : '/'}${url}`;
+      let _url = `${isR ? '' : '/'}${url}`;
       if (parentPath === '' || parentPath === '/') {
-        if (_url !== '/') {
-          return _url.replace(/\/$/, '');
-        }
         return _url;
       } else {
         return getFullPath(`${parentPath}${_url}`, node.parentElement);
@@ -36,10 +33,14 @@ function getFullPath(url: string, node: HTMLElement): string {
       return getFullPath(url, node.parentElement);
     }
   }
+  let ret = url;
   if (!isR) {
-    return `/${url}`;
+    ret = `/${url}`;
   }
-  return url;
+  if (ret !== '/') {
+    ret = ret.replace(/\/$/, '');
+  }
+  return ret;
 }
 
 @customElement('native-route')
