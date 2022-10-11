@@ -18,6 +18,8 @@ export type RouteConfig = {
   children?: RouteConfig[];
 }[];
 
+const DYNAMIC_ROUTE_PATH_REGEXP = /^\:/;
+
 function getFullPath(url: string, node: HTMLElement): string {
   let isR = /^\//.test(url);
   if (node.parentElement && node.parentElement.tagName !== 'BODY') {
@@ -353,7 +355,7 @@ export class Route extends LitElement {
       this.setCSSContent(this.cssContent, false);
     } else {
       const css_url = this.shadowCSSUrl || this.cssUrl;
-      if (css_url ) {
+      if (css_url) {
         this.cssReady = 'pending';
         try {
           // fetch css content
@@ -632,30 +634,34 @@ export class Route extends LitElement {
           composed: true,
         })
       );
-      if (this.active) {
-        if (this.cacheDestroyTimer) {
-          this.cachelog('current module active, clear timer', this);
-          clearTimeout(this.cacheDestroyTimer);
-          this.cacheDestroyTimer = undefined;
+      if (this.url) {
+        if (this.active) {
+          if (this.cacheDestroyTimer) {
+            this.cachelog('current module active, clear timer', this);
+            clearTimeout(this.cacheDestroyTimer);
+            this.cacheDestroyTimer = undefined;
+          }
+          this.log('attach route active');
+          if (
+            this.lazy &&
+            (!this._url_module ||
+              this.moduleReady !== 'fulfilled' ||
+              (this.isCssExsit() && this.cssReady !== 'fulfilled'))
+          ) {
+            this.log('in lazy mode, some source not loaded, call loadAssets');
+            this.loadAssets();
+          } else {
+            this._render_url_module();
+          }
         }
-        this.log('attach route active');
-        if (
-          this.lazy &&
-          (!this._url_module ||
-            this.moduleReady !== 'fulfilled' ||
-            (this.isCssExsit() && this.cssReady !== 'fulfilled'))
-        ) {
-          this.log('in lazy mode, some source not loaded, call loadAssets');
-          this.loadAssets();
-        } else {
-          this._render_url_module();
-        }
-      }
-      if (!this.active) {
-        if (this.drop) {
-          this._call_module_destroy();
-        } else {
-          this._set_cache_invalid_timer();
+        if (!this.active) {
+          if (this.url) {
+            if (this.drop) {
+              this._call_module_destroy();
+            } else {
+              this._set_cache_invalid_timer();
+            }
+          }
         }
       }
     }
@@ -687,22 +693,23 @@ export class Route extends LitElement {
   }
 
   private _parse_route_match_check_group() {
-    let _path: string = this.fullpath;
+    let _fullpath = this.fullpath;
 
     let _grouped_path: string[];
 
-    const baseSplit = (p: string) => {
-      let gp = p.split('/');
-      if (p === '/') {
-        // remove additional empty str.
-        gp = [gp[0], ...gp.slice(1)];
+    const baseSplit = (path: string) => {
+      if (path === '/') {
+        // '/'.split('/') === ['', '']
+        // expact as ['']
+        return [''];
       }
-      return gp;
+      let pathGroup = path.split('/');
+      return pathGroup;
     };
 
     if (this.groupMatchMode) {
-      _grouped_path = _path.split(this.path);
-      if (_path.endsWith(this.path)) {
+      _grouped_path = _fullpath.split(this.path);
+      if (_fullpath.endsWith(this.path)) {
         _grouped_path = _grouped_path.slice(0, -1); // remove lastest empty str
       }
       _grouped_path = _grouped_path.map((t) => t.replace(/\/$/, '')); // remove lastest `/`
@@ -712,11 +719,13 @@ export class Route extends LitElement {
         ..._grouped_path.slice(1),
       ];
     } else {
-      // _grouped_path = _path.split('/').filter(t => t !== '');
-      _grouped_path = baseSplit(_path);
+      _grouped_path = baseSplit(_fullpath);
     }
+
     return _grouped_path.map((t) =>
-      t.startsWith(':') ? new RegExp(t.replace(/^\:/, '')) : t
+      DYNAMIC_ROUTE_PATH_REGEXP.test(t)
+        ? new RegExp(t.replace(DYNAMIC_ROUTE_PATH_REGEXP, ''))
+        : t
     );
   }
 

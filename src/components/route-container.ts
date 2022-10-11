@@ -64,26 +64,30 @@ export class RouteContainer extends LitElement {
     this.contentOf404 = content;
   }
 
+  private _render_404() {
+    if (!this.contentOf404) return nothing;
+    let type = typeof this.contentOf404;
+    if (type === 'string') {
+      return html`${unsafeHTML(this.contentOf404 as string)}`;
+    }
+    if (type === 'function') {
+      return html`${unsafeHTML((this.contentOf404 as () => string)() ?? '')}`;
+    }
+    return nothing;
+  }
+
   private _render_with_light_dom() {
     if (this.active && this.status === '404') {
-      if (!this.contentOf404) return nothing;
-      let type = typeof this.contentOf404;
-      if (type === 'string') {
-        return html`${unsafeHTML(this.contentOf404 as string)}`;
-      }
-      if (type === 'function') {
-        return html`${unsafeHTML((this.contentOf404 as () => string)() ?? '')}`;
-      }
-      return nothing;
+      return this._render_404();
     }
     return nothing;
   }
 
   private _render_with_shadow_dom() {
     if (this.active && this.status === '404') {
-      return html`<slot name="404"></slot>`;
+      return html`<slot name="404">${this._render_404()}</slot>`;
     }
-    return html`<slot name="common"></slot>`;
+    return html`<slot></slot>`;
   }
 
   protected render() {

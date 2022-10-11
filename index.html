@@ -9,9 +9,9 @@
 
     <!-- <link
       rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.0.0-beta.74/dist/themes/light.css"
+      href="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.0.0-beta.83/dist/themes/light.css"
     /> -->
-    <!-- <script type="module" src="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.0.0-beta.74/dist/shoelace.js"></script> -->
+    <!-- <script type="module" src="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.0.0-beta.83/dist/shoelace.js"></script> -->
   </head>
 
   <body class="sl-theme-light">
@@ -54,11 +54,20 @@
 			}
 
 			native-route {
-				display: none;
+				visibility: hidden;
 			}
 			native-route:defined {
-				display: block;
+				/* display: block; */
+        visibility: visible;
 			}
+
+      native-route-container {
+        visibility: hidden;
+      }
+      native-route-container:defined {
+        visibility: visible;
+      }
+
 
       .route-content {
         border: 1px solid #d5d5d5;
@@ -199,16 +208,16 @@
         <native-route path="/lazy/sl">
           <native-route
             path="button"
-            url="//cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.0.0-beta.74/dist/components/button/button.js"
-            css-url='["https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.0.0-beta.77/dist/themes/light.css"]'
+            url="//cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.0.0-beta.83/dist/components/button/button.js"
+            css-url='["https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.0.0-beta.83/dist/themes/light.css"]'
             element='<sl-button>Button</sl-button><sl-button variant="primary">Primary</sl-button><sl-button variant="neutral" loading>Neutral</sl-button>'
             lazy
           >
           </native-route>
           <native-route
             path="ready_button"
-            url="//cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.0.0-beta.74/dist/components/button/button.js"
-            css-url='["//cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.0.0-beta.74/dist/themes/light.css"]'
+            url="//cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.0.0-beta.83/dist/components/button/button.js"
+            css-url='["//cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.0.0-beta.83/dist/themes/light.css"]'
             element='<sl-button>Render After Ready Button</sl-button><sl-button variant="primary">Primary</sl-button><sl-button variant="neutral" loading>Neutral</sl-button>'
             render-after-ready
             lazy
@@ -241,17 +250,17 @@
         <native-route
           path="/loading"
           lazy
-          url="//cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.0.0-beta.74/dist/components/button/button.js"
-          css-url="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.0.0-beta.77/dist/themes/light.css"
+          url="//cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.0.0-beta.83/dist/components/button/button.js"
+          css-url="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.0.0-beta.83/dist/themes/light.css"
           render-after-ready
           loadingElement="<span>will show loading... 50000ms</span>"
           lockLoadingTime="50000"
         ></native-route>
       </div>
 
-      <h3>route container demo area</h3>
+      <h3>common route container demo area</h3>
       <ul>
-        <li><a href="/route-container">container</a></li>
+        <li><a href="/route-container">container  (virtualNode, this route's active status will be ignored by container)</a></li>
         <li><a href="/route-container/not-match-any-route-asd123t9q3gjh34g1">unvalid route</a></li>
         <li><a href="/route-container/not-404">valid route</a></li>
       </ul>
@@ -260,21 +269,22 @@
           <div slot="404" style="width: 100px; height: 50px; display: flex; align-items: center; justify-content: space-around;">
             <strong>404</strong>
           </div>
-          <native-route slot="common" path="/" virtualNode>
+          <div>
             <native-route
-              path="route-container"
+              path="/route-container"
               lazy
-              url="//cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.0.0-beta.74/dist/components/button/button.js"
-              css-url="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.0.0-beta.77/dist/themes/light.css"
+              url="//cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.0.0-beta.83/dist/components/button/button.js"
+              css-url="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.0.0-beta.83/dist/themes/light.css"
               render-after-ready
               loadingElement="<span>will show loading as last 96ms</span>"
               lockLoadingTime="96"
-              element="hello"
+              element="<div><code>route container demo</code></div>"
+              virtualNode
             >
               <native-route path="not-match-path_1jj41gn5og159" element="not match route, this content should not appear"></native-route>
               <native-route path="not-404" element="common content here"></native-route>
             </native-route>
-          </native-route>
+          </div>
         </native-route-container>
       </div>
       
@@ -285,22 +295,20 @@
         <li><a href="/light-dom-route-container/not-404">valid route</a></li>
       </ul>
       <div class="route-content">
-        <native-route-container disableShadow root-path="/light-dom-route-container">
-          <native-route path="/" virtualNode>
-            <native-route
-              path="light-dom-route-container"
-              lazy
-              url="//cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.0.0-beta.74/dist/components/button/button.js"
-              css-url="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.0.0-beta.77/dist/themes/light.css"
-              render-after-ready
-              loadingElement="<span>will show loading as last 96ms</span>"
-              lockLoadingTime="96"
-              element="container here"
-              exact
-            >
-            </native-route>
-            <native-route exact path="light-dom-route-container/not-match-path_1jj41gn5og159" element="not match route, this content should not appear"></native-route>
-            <native-route exact path="light-dom-route-container/not-404" element="<span>common content here</span>"></native-route>
+        <native-route-container root-path="/light-dom-route-container" disableShadow>
+          <native-route
+            path="/light-dom-route-container"
+            lazy
+            url="//cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.0.0-beta.83/dist/components/button/button.js"
+            css-url="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.0.0-beta.83/dist/themes/light.css"
+            render-after-ready
+            loadingElement="<span>will show loading as last 96ms</span>"
+            lockLoadingTime="96"
+            element="<div><code>no shadow dom route container demo<br/>this line always visiable while location.href starts with `/light-dom-route-container`</code></div>"
+            virtualNode
+          >
+            <native-route path="not-match-path_1jj41gn5og159" element="not match route, this content should not appear"></native-route>
+            <native-route path="not-404" element="<span>common content here</span>"></native-route>
           </native-route>
         </native-route-container>
       </div>
@@ -315,9 +323,39 @@
         <li><a href="/dynamic-route/not-matched">not matched</a></li>
       </ul>
       <div class="route-content">
-        <native-route-container disableShadow root-path="/dynamic-route">
-          <native-route path="/dynamic-route" virtualNode>
+        <native-route-container
+          disableShadow
+          root-path="/dynamic-route"
+          element="<div><code>dynamic route</code></div>"
+        >
+          <native-route path="/dynamic-route">
             <native-route path=":matched_[0-9]" element="matched"></native-route>
+            <native-route path=":DEFAULT" element="not match"></native-route>
+          </native-route>
+        </native-route-container>
+      </div>
+
+      <h3>group route match mode</h3>
+      <p>
+        <section>group match mode will split path to <code style="background-color: #9e9e9e25; border-radius: 4px;">['before self route', 'self route', 'after self route']</code></section>
+        <section>
+          common match mode will split path to
+          <code style="background-color: #9e9e9e25; border-radius: 4px;">
+            fullpath.split('/')
+          </code>
+        </section>
+      </p>
+      <ul>
+        <li><a href="/group-match-route">group-match-route</a></li>
+        <li><a href="/group-match-route/matched_1">matched value 1</a></li>
+        <li><a href="/group-match-route/nest/route">nest route</a></li>
+        <li><a href="/group-match-route/not-matched">not matched</a></li>
+      </ul>
+      <div class="route-content">
+        <native-route-container root-path="/group-match-route" disableShadow>
+          <native-route path="/group-match-route" element="<div><code>group match mode</code></div>">
+            <native-route path="matched_1" element="matched value 1"></native-route>
+            <native-route path=":(?:^$)|(?:nest)|(?:nest/route)" element="nest route" groupMatchMode></native-route>
             <native-route path=":DEFAULT" element="not match"></native-route>
           </native-route>
         </native-route-container>
@@ -325,7 +363,7 @@
     </main>
 
     <script type="module">
-      document.querySelectorAll('native-route-container[disableShadow]').forEach(t => {
+      document.querySelectorAll('native-route-container').forEach(t => {
         console.log(t);
         t.set404Content(/* html */`
           <div style="width: 100px; height: 50px; display: flex; align-items: center; justify-content: space-around;">
