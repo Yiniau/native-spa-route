@@ -1,6 +1,6 @@
 {
   "name": "native-spa-route",
-  "version": "0.2.16",
+  "version": "0.2.17",
   "author": "Yiniau",
   "license": "MIT",
   "email": "yiranzhouyida@gmail.com",
@@ -45,37 +45,37 @@
     "dev:demo": "zx ./scripts/serve-demo.mjs",
     "make:demo": "zx ./scripts/make-demo.mjs",
     "test": "vite build --config vite.config.test.ts && web-test-runner --coverage",
-    "show-coverage": "npx web-dev-server --port 9898 --root-dir coverage/lcov-report coverage/lcov-report/index.html --open"
+    "show-coverage": "./node_modules/.bin/web-dev-server --port 9898 --root-dir coverage/lcov-report coverage/lcov-report/index.html --open"
   },
   "dependencies": {
     "debug": "^4.3.4",
-    "lit": "^2.2.7"
+    "lit": "^2.6.1"
   },
   "devDependencies": {
-    "@open-wc/testing": "^3.1.6",
-    "@types/chai": "^4.3.3",
+    "@open-wc/testing": "^3.1.7",
+    "@types/chai": "^4.3.4",
     "@types/debug": "^4.1.7",
     "@types/mocha": "^9.1.1",
-    "@types/node": "^18.0.6",
-    "@vitejs/plugin-react": "^2.0.0",
-    "@vue/compiler-sfc": "^3.2.37",
-    "@web/dev-server": "^0.1.32",
-    "@web/dev-server-esbuild": "^0.3.2",
-    "@web/test-runner": "^0.14.0",
-    "@web/test-runner-playwright": "^0.8.10",
-    "esbuild": "^0.14.49",
+    "@types/node": "^18.15.0",
+    "@vitejs/plugin-react": "^3.1.0",
+    "@vue/compiler-sfc": "^3.2.47",
+    "@web/dev-server": "^0.1.35",
+    "@web/dev-server-esbuild": "^0.3.3",
+    "@web/test-runner": "^0.15.1",
+    "@web/test-runner-playwright": "^0.9.0",
+    "esbuild": "^0.14.54",
     "esbuild-plugin-svg": "^0.1.0",
     "esbuild-plugin-vue": "^0.2.4",
     "fs-extra": "^10.1.0",
-    "globby": "^13.1.2",
-    "tsc-alias": "^1.7.0",
-    "typescript": "^4.7.4",
-    "vite": "^3.0.2",
-    "zx": "^7.0.7"
+    "globby": "^13.1.3",
+    "tsc-alias": "^1.8.3",
+    "typescript": "^4.9.5",
+    "vite": "^4.1.4",
+    "zx": "^7.2.0"
   },
   "peerDependencies": {
     "debug": "^4.3.4",
-    "lit": "^2.2.7"
+    "lit": "^2.6.1"
   },
   "publishConfig": {
     "registry": "https://registry.npmjs.org"

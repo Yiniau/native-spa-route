@@ -463,6 +463,10 @@ export class Route extends LitElement {
     let _grouped_path = this._route_match_check_grouped_path;
 
     this.isExactMatch = window.location.pathname === _path;
+    if (this.isExactMatch) {
+      this.active = true;
+      return;
+    }
 
     if (this.exact) {
       this.active = window.location.pathname === _path;
@@ -508,14 +512,21 @@ export class Route extends LitElement {
   }
 
   private _call_module_destroy() {
+    this.log('call module destroy');
     if (this.moduleReady === 'fulfilled') {
+      if (this.cacheDestroyTimer) {
+        this.log('clear destroy timer first');
+        clearTimeout(this.cacheDestroyTimer);
+        this.cacheDestroyTimer = undefined;
+      }
       this._url_module?.then(({ destroy }) => {
         if (typeof destroy === 'function') {
-          this.cachelog('set clear timer in ', this.cacheVaildTime);
           try {
             this.cachelog('call module destory in module: ', this);
             destroy();
-            this.isModuleRenderInstanceDestroied = true;
+            if (!this.drop) {
+              this.isModuleRenderInstanceDestroied = true;
+            }
           } catch (error) {
             console.warn('module destory failed');
             console.warn(error);
@@ -532,6 +543,7 @@ export class Route extends LitElement {
   }
 
   private _set_cache_invalid_timer() {
+    this.log('call cache invaild timer');
     if (!this._could_set_cache_invalid_timer()) {
       return this.cachelog('cannot set cache clear timer');
     }
@@ -628,6 +640,16 @@ export class Route extends LitElement {
   async updated(changedProperties: Map<string | number | symbol, unknown>) {
     if (changedProperties.has('active')) {
       this.dispatchEvent(
+        new CustomEvent('route:active_status_change', {
+          detail: {
+            current: this.active,
+            previous: changedProperties.get('active'),
+          },
+          bubbles: true,
+          composed: true,
+        })
+      );
+      this.dispatchEvent(
         new CustomEvent(`route:${this.active ? 'active' : 'un_active'}`, {
           detail: {},
           bubbles: true,
@@ -653,14 +675,11 @@ export class Route extends LitElement {
           } else {
             this._render_url_module();
           }
-        }
-        if (!this.active) {
-          if (this.url) {
-            if (this.drop) {
-              this._call_module_destroy();
-            } else {
-              this._set_cache_invalid_timer();
-            }
+        } else {
+          if (this.drop) {
+            this._call_module_destroy();
+          } else {
+            this._set_cache_invalid_timer();
           }
         }
       }

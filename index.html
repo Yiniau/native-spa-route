@@ -354,9 +354,9 @@
       <div class="route-content">
         <native-route-container root-path="/group-match-route" disableShadow>
           <native-route path="/group-match-route" element="<div><code>group match mode</code></div>">
-            <native-route path="matched_1" element="matched value 1"></native-route>
+            <native-route path="matched_1" element="matched value 1" groupMatchMode></native-route>
             <native-route path=":(?:^$)|(?:nest)|(?:nest/route)" element="nest route" groupMatchMode></native-route>
-            <native-route path=":DEFAULT" element="not match"></native-route>
+            <native-route path=":DEFAULT" element="not match" groupMatchMode></native-route>></native-route>
           </native-route>
         </native-route-container>
       </div>
