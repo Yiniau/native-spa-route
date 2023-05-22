@@ -789,7 +789,7 @@ declare global {
   interface HTMLElementTagNameMap {
     'native-route': Route;
   }
-  interface ElementEventMap {
+  interface DocumentEventMap {
     /**
      * dispatch event while active status changed
      */
