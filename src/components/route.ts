@@ -789,4 +789,19 @@ declare global {
   interface HTMLElementTagNameMap {
     'native-route': Route;
   }
+  interface DocumentAndElementEventHandlersEventMap {
+    /**
+     * dispatch event while active status changed
+     */
+    'route:active_status_change': CustomEvent<{
+      current: boolean;
+      previous: boolean;
+    }>;
+    'route:active': CustomEvent<{}>;
+    'route:un_active': CustomEvent<{}>;
+    /**
+     * dispatch event while isExactMatch attribute changed
+     */
+    'route:exact_match_change': CustomEvent<boolean>;
+  }
 }
