@@ -1,14 +1,11 @@
 import './components/route';
 import './components/route-container';
 
-import {
-  hook_a_link,
-  hook_history_change,
-} from './lib/hooks';
+import { hook_a_link, hook_history_change } from './lib/hooks';
 
 let initted = false;
 
-export const version = '0.2.11';
+export const version = '0.2.12';
 
 export function preload() {
   if (initted) return;
