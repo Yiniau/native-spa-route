@@ -69,7 +69,7 @@
     "fs-extra": "^10.1.0",
     "globby": "^13.2.2",
     "tsc-alias": "^1.8.8",
-    "typescript": "^4.9.5",
+    "typescript": "^5.3.3",
     "vite": "^5.0.12",
     "zx": "^7.2.3"
   },
