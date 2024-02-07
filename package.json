@@ -77,10 +77,5 @@
   },
   "publishConfig": {
     "registry": "https://registry.npmjs.org"
-  },
-  "enpm": {
-    "overrides": {
-      "ws@^0": "^1"
-    }
   }
 }
